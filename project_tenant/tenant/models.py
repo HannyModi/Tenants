@@ -60,7 +60,7 @@ class TblTenant(models.Model):
     # Contact of Tenant
     tn_contact = models.CharField(validators=[phone_regex],
                                   null=False, blank=False,
-                                  unique=True, max_length=13)
+                                  max_length=13)
     # Perrmanent Address of tenant
     tn_permanent_address = models.CharField(max_length=255)
     # image of Tenant
@@ -87,6 +87,7 @@ class TblTenant(models.Model):
 
     class Meta:
         verbose_name_plural = 'Tenant Datails'
+        unique_together = (('tn_contact','tn_agent'))
 
     def __str__(self):
         return self.tn_name
