@@ -355,9 +355,8 @@ tbody tr {
                         <h4 class="modal-title">Add Rent</h4>
                     </div>
                     <div class="modal-body">
-                            <input type="hidden" id='id'>
                             
-                            Tenant Name : <select name="status" id="tid" required>               
+                            Tenant Name : <select name="status" id="tenantid" style="width:100%" required>               
                             {% comment %} <option value="0">Property Not Allocated</option>
                             <option value="1">Visit</option>
                             <option value="2">Deal Accepted,aggrement under process</option>
@@ -367,7 +366,7 @@ tbody tr {
                             </br>
                             </br>
 
-                            Property Name : <input type="text" disabled id="property_name" class="hidden" /></br></br>
+                            Property Name : <input type="text" disabled id="allocated_property_name" style="width:100%" class="hidden" /></br></br>
                     </div>
                     <div class="modal-footer">
                         <center>  <button class="btn btn-info btn-rounded " id="addrent">Add Rent</button>

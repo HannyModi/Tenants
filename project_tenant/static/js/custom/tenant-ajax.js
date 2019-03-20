@@ -850,6 +850,28 @@ $('.add_rent').live('click', function () {
 
 function addrentclick(){
     // alert("Hello")
+    $.get('/agent/getAllocatedtenants/',{},function(data){
+    // alert(data)
+    console.log(data);
+    $('#tenantid').html(data)
+    $('#tenantid').select2()
     $('#mymodalforaddrent').css('display', 'block');
+    })
     };
-    
+
+$('#tenantid').live('change',function(){
+    // alert($('#tenantid').val())
+    $.get('/agent/getAllocatedtenants/',{tenantid:$('#tenantid').val()},function(data)
+    {
+        console.log(data);
+        $('#allocated_property_name').val(data)
+        $('#allocated_property_name').removeClass('hidden')
+    })
+})
+
+$('#addrent').live('click',function(){
+    $('#allocated_property_name').addClass('hidden')
+    $('#mymodalforaddrent').css('display', 'none');
+    tid=$('#tenantid').val()
+    location.href = '/agent/add_rent/?tid='+tid;
+})
