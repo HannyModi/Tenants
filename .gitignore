@@ -1,0 +1,5 @@
+.Python
+/env_tenant/
+/project_tenant/project_tenant/settings.py
+.DS_Store
+project_tenant/tenant/__pycache__/

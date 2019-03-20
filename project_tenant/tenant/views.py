@@ -821,7 +821,7 @@ def property_soldout(request):
         obj_pr.pr_is_allocated = False
         obj_pr.save()
         pAllocation = TblPropertyAllocation.objects.get(
-            pa_property=pobj, pa_is_allocated=True)
+            pa_property=obj_pr, pa_is_allocated=True)
         print(type(pAllocation))
         pAllocation.pa_tenant.tn_status = 0
         pAllocation.pa_tenant.save()
@@ -1717,4 +1717,9 @@ def check_allocation(request):
                 return HttpResponse("1")
             else:
                 return HttpResponse("0")
-            
+
+
+
+@for_staff
+def getAllocatedtenants:
+    return HttpResponse("1")   
