@@ -1721,5 +1721,5 @@ def check_allocation(request):
 
 
 @for_staff
-def getAllocatedtenants:
+def getAllocatedtenants(request):
     return HttpResponse("1")   

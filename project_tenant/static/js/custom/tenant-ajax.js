@@ -388,10 +388,12 @@ $('#save').click(function () {
 $('.close').click(function () {
     $('#myModal').css('display', 'none')
     $('#imgDiv').css('display', 'none')
+    $('#mymodalforaddrent').css('display', 'none');
 });
 
 $('#close').click(function () {
     $('#myModal').css('display', 'none')
+    $('#mymodalforaddrent').css('display', 'none');
 });
 
 $('.deallocate_clone').live('click', function () {
