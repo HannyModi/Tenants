@@ -1628,6 +1628,94 @@ def change_status(request):
             print('Error in updating the ststus of tenant.', e)
             return HttpResponse("0")
 
+
+def view_visit(request):
+    data = TblVisit.objects.all().dates('vs_date','month',order='DESC')\
+        .distinct('datefield').order_by('datefield').values('datefield')
+    print(data.values('datefield'))
+    visits = TblVisit.objects.all().select_related('vs_tenant')\
+        .select_related('vs_property')\
+        .annotate(
+            vs_address=Subquery(
+                TblProperty.objects.filter(
+                    pk=OuterRef('vs_property')
+                )
+                .select_related('pr_master__cln_master')
+                .values('pr_address',
+                        'pr_master__cln_master__msp_name',
+                        'pr_master__cln_master__msp_address')
+                .annotate(
+                    address=Concat(
+                        'pr_address',
+                        Value(', '),
+                        'pr_master__cln_master__msp_name',
+                        Value(', '),
+                        'pr_master__cln_master__msp_address'
+                    )
+                )
+                .values('address'),
+                output_field=CharField()
+            )
+    )
+    allocated_visits = TblVisit.objects.filter(
+        vs_property__pr_is_allocated=True)\
+        .select_related('vs_tenant')\
+        .select_related('vs_property')\
+        .annotate(
+            vs_address=Subquery(
+                TblProperty.objects.filter(
+                    pk=OuterRef('vs_property')
+                )
+                .select_related('pr_master__cln_master')
+                .values('pr_address',
+                        'pr_master__cln_master__msp_name',
+                        'pr_master__cln_master__msp_address')
+                .annotate(
+                    address=Concat(
+                        'pr_address',
+                        Value(', '),
+                        'pr_master__cln_master__msp_name',
+                        Value(', '),
+                        'pr_master__cln_master__msp_address'
+                    )
+                )
+                .values('address'),
+                output_field=CharField()
+            )
+    )
+    unallocated_visits = TblVisit.objects.filter(
+        vs_property__pr_is_allocated=False)\
+        .select_related('vs_tenant')\
+        .select_related('vs_property')\
+        .annotate(
+            vs_address=Subquery(
+                TblProperty.objects.filter(
+                    pk=OuterRef('vs_property')
+                )
+                .select_related('pr_master__cln_master')
+                .values('pr_address',
+                        'pr_master__cln_master__msp_name',
+                        'pr_master__cln_master__msp_address')
+                .annotate(
+                    address=Concat(
+                        'pr_address',
+                        Value(', '),
+                        'pr_master__cln_master__msp_name',
+                        Value(', '),
+                        'pr_master__cln_master__msp_address'
+                    )
+                )
+                .values('address'),
+                output_field=CharField()
+            )
+    )
+
+    # print(visits.values())
+    return render(request, 'agent/view_visit.html',
+                  {'visits': visits,
+                   'allocated_visits': allocated_visits,
+                   'unallocated_visits': unallocated_visits})
+
 @for_staff
 def getrent(request):
     rent = TblProperty.objects.get(id=request.GET['pid'])
