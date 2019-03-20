@@ -176,6 +176,10 @@ img.img-polaroid {
 4. Header
 ==================================== */
 
+a {
+  cursor: pointer;
+}
+
 /* --- header -- */
 
 header {

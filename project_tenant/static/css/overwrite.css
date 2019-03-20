@@ -186,6 +186,9 @@ input[type="color"]:focus,
 
 }
 
+a {
+  cursor: pointer;
+}
 
 .table-bordered thead:first-child tr:first-child > th:first-child,
 .table-bordered tbody:first-child tr:first-child > td:first-child {
