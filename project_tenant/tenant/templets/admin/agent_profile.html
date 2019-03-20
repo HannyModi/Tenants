@@ -1,0 +1,199 @@
+{% extends 'admin/base.html' %}
+{% load staticfiles %}
+{% block title_block %}
+    Agent List
+{% endblock %}
+
+{% block bodyblock %}
+
+<section id="inner-headline">
+    <div class="container">
+        <div class="row">
+            <div class="span12">
+                <div class="inner-heading">
+                    <ul class="breadcrumb">
+                        <li><a href="{% url 'admin_index' %}">Home</a> <i class="icon-angle-right"></i></li>
+                        <li><a href="{% url 'admin_agent_requests' %}">Agent Requests</a> <i class="icon-angle-right"></i></li>
+                        <li class="active">Agent Request details</li>
+                    </ul>
+                    <h2>Agent Request details</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span></br>
+    <div>
+    <input type="hidden" id='id'>
+    Address<input type="text" disabled id="pr_address" /></br>
+    Clone<input type="text" disabled id="pr_clone" /></br>
+    Status<input type="text" disabled id="pr_status" /></br>
+    Deposite<input type="text" id='pr_deposite' ></br>
+    Rent<input class='desimal_input' type="text" id='pr_rent'/></br>
+    description<input type='text' id='pr_description'>
+    </br>
+    <button class="btn btn-info btn-rounded btn-medium" id="save">Save</button>
+    <button class="btn btn-danger btn-rounded btn-medium" id="close">Cancel</button>
+
+
+    </div>
+  </div>
+
+</div>
+
+
+<section id="container">
+    <div class="container">
+        <div class="row">
+            <div class="span8">
+                <div style="background-image: url('images/bg-01.jpg');">
+                    <div class="box flyIn animated fadeInUp">
+                        <center>
+                            {% if agent %}
+                            <table style="border-spacing:125px;">
+                                <tr style="padding:20px;">
+                                   
+                                    <td colspan="2" style="padding:20px;"> <img height="250" width="250" src="{{ MEDIA_URL }}{{ agent.ag_profile_image }}"
+                                            alt="no image of {{ agent.username }}"></td>
+                                </tr>
+                                <tr style="padding:20px;">
+                                    <td style="padding:20px;"><b>Name:</b></td>
+                                    <td style="padding:20px;">{{ agent.first_name }} {{ agent.last_name }}</td>
+                                </tr>
+                                <tr style="padding:20px;">
+                                    <td style="padding:20px;"><b>Contact:</b></td>
+                                    <td style="padding:20px;">{{ agent.ag_contact }}</td>
+                                </tr>
+                                <tr style="padding:20px;">
+                                    <td style="padding:20px;"><b>Email:</b></td>
+                                    <td style="padding:20px;">{{ agent.email }}</td>
+                                </tr>
+                                <tr style="padding:20px;">
+                                    <td style="padding:20px;"><b>Local Address:</b></td>
+                                    <td style="padding:20px;">{{ agent.ag_local_address }}</td>
+                                </tr>
+                                <tr style="padding:20px;">
+                                    <td style="padding:20px;"><b>Joinning Date:</b></td>
+                                    <td style="padding:20px;">{{ agent.date_joined }}</td>
+                                </tr>
+                               {% if not agent.is_superuser  and agent.is_staff %}
+                                    {% if agent.is_active %} 
+                                        <tr style="padding:20px;">
+                                            <td style="padding:20px;"><b>Status:</b></td>
+                                            <td style="padding:20px;" id="td{{agent.id}}">Active</td>
+                                        </tr>
+                                        
+                                    {% else %} 
+                                        <tr style="padding:20px;">
+                                            <td style="padding:20px;"><b>Status:</b></td>
+                                            <td style="padding:20px;" id="td{{agent.id}}">Retired</td>
+                                        </tr>
+                                        {% comment %} <tr>
+                                            <td id="td{{agent.id}}" >Retired</td>
+                                            <td colspan='2' align="center"><input type="button" class="agent-act btn-success btn-rounded" data-id="{{ agent.id }}" data-act="1" value="Activate"></td>
+                                        </tr> {% endcomment %}
+                                    {% endif %}
+                                {% endif %}
+                            </table>
+                           
+
+                                    {% if  not agent.is_active  and not agent.is_staff  %}
+                                    <tr style="padding:20px;">
+                                        <td style="padding:20px;">
+                                            <form method="POST" action="{% url 'admin_agent_request_accept' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="id" value="{{ agent.id }}">
+                                                <input type="submit" name="submit" class="btn btn-success" value="Accept">
+                                            </form>
+                                        </td>
+                                        <td style="padding:20px;">
+                                            <form method="POST" action="{% url 'admin_agent_request_reject' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="id" value="{{ agent.id }}">
+                                                <input type="submit" name="submit" class="btn btn-danger" value="Reject">
+                                            </form>
+                                        </td>
+
+                                    </tr>
+                                    {% endif %}
+                                    {% if not agent.is_superuser  and agent.is_staff %}
+                                     <h2 style="align:center">Allocation details</h2>
+                                    <section id="container">
+                                        <div class="container">
+                                            <div class="row">
+                                                <div class="span11">
+
+                                                    <div style="background-image: url('images/bg-01.jpg');">
+                                                        <div>
+
+                                                            {% if allocations %}
+                                                            <table class="table">
+                                                                <tr class="success">
+                                                                    <th>Clone Name</th>
+                                                                    <th>Master Property</th>
+                                                                    <th>No of properties</th>
+                                                                    <th>Alloacted properties</th>
+                                                                    <th>Unallocated properties</th>
+                                                                </tr>
+
+                                                                {% for allocation in allocations %}
+                                                                    <tr>
+                                                                        <td>{{ allocation.al_master.cln_alias}} </td>
+                                                                        <td>{{ allocation.al_master.cln_master.msp_name }}</td>
+                                                                        <td>{{ allocation.properties }}   <a class="show_data_agent" data-id="{{allocation.al_master.id}}" data-hidden="1" data-act="all_properties"><i class="icon-angle-down"></i></a></td>
+                                                                        <td>{{ allocation.allocated}}   <a class="show_data_agent" data-id="{{allocation.al_master.id}}" data-hidden="1" data-act="allocated_properties"><i class="icon-angle-down"></i></a></td>
+                                                                        <td>{{ allocation.unallocated }}  <a class="show_data_agent" data-id="{{allocation.al_master.id}}" data-hidden="1" data-act="unallocated_properties"><i class="icon-angle-down"></i></a> </td>
+                                                                    </tr>
+                                                                    {% autoescape off %}
+                                                                        <tr class="accordion-body collapse hidden" style="height: max-content;">
+                                                                            <td colaspan = 9>
+                                                                            aaya
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% endautoescape %}
+
+                                                                {% endfor %}
+                                                                </div>
+                                                            </table>
+                                                            
+                                                            {% else %}
+                                                            <strong>No Allocation Record Found..</strong>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    {% if agent.is_active %} 
+                                        <tr>
+                                            {% comment %} <td id="td{{agent.id}}">Active</td> {% endcomment %}
+                                            <td colspan='2' align="center"><input type="button" class="agent-act btn-danger btn-rounded" data-id="{{ agent.id }}" data-act="0" data-view="view" value="Retire"></td> 
+                                        </tr>                             
+                                    {% else %} 
+                                        
+                                        <tr>
+                                            {% comment %} <td id="td{{agent.id}}" >Retired</td> {% endcomment %}
+                                            <td colspan='2' align="center"><input type="button" class="agent-act btn-success btn-rounded" data-id="{{ agent.id }}" data-act="1" data-view="view" value="Activate"></td>
+                                        </tr>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                      
+                            {% else %}
+                            <strong>Profile not found .</strong>
+                            {% endif %}
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
