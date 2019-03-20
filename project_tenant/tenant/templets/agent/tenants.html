@@ -67,7 +67,13 @@
                     <td>
                         {% if tenant.tn_is_active == True %}
                             {% if tenant.tn_status == 3 %}
-                            <button data-tid="{{ tenant.id }}" class="btn btn-danger btn-rounded btn-small deallocate_tenant">Deallocate</button>
+                                <div class="dropdown">
+                                    <button data-tid="{{ tenant.id }}" class="btn btn-danger btn-rounded btn-small dropdownlink">Option</button>
+                                    <div class="dropdown-content">
+                                        <a data-tid="{{ tenant.id }}" data-toggle="tooltip" title="Deallocate Property from Tenant" class="deallocate_tenant"> Deallocate </a>
+                                        <a data-tid="{{ tenant.id }}" class="add_rent" data-toggle="tooltip" title="Add Rent">Rent</a>
+                                    </div>
+                                </div>
                             {% elif tenant.tn_status == 2 %}
                             <button data-tid="{{ tenant.id }}"  class="btn btn-info btn-rounded btn-small allocate_tenant">Handover</button>
                             {% elif tenant.tn_status == 1 or tenant.tn_status == 0  %}
