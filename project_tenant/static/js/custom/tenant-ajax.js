@@ -844,3 +844,10 @@ $('.add_rent').live('click', function () {
 
     };
 })
+
+
+function addrentclick(){
+    // alert("Hello")
+    $('#mymodalforaddrent').css('display', 'block');
+    };
+    
