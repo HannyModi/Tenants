@@ -13,9 +13,9 @@
 
     <style>
 
-.alert{
-    display: none;
-}
+        .alert{
+            display: none;
+        }
 
         /* Image Formatting */
 
@@ -134,12 +134,12 @@
         }
 
         .fixed_header2 tbody {
-  display: block;
-  max-height: 200px;
-  overflow-y: scroll;
-  border-collapse: collapse;
+        display: block;
+        max-height: 100px;
+        overflow-y: scroll;
+        border-collapse: collapse;
 
-}
+        }
 
 .fixed_header2 thead,
 tbody tr {
@@ -308,11 +308,10 @@ tbody tr {
                                         </ul>
                                     </li>
                                     <li class="dropdown">
-                                        <a href="{% url 'view_visit' %}">Property <i
-                                                class="icon-angle-down"></i></a>
-                                        <ul class="dropdown-menu">
+                                        <a href="{% url 'view_visit' %}">View Visit </a>
+                                        {% comment %} <ul class="dropdown-menu">
                                             <li><a href="{% url 'allocated_property_view' %}">View Property</a></li>
-                                        </ul>
+                                        </ul> {% endcomment %}
                                     </li>
                                     <li>
                                         <a href="{% url 'index' %}" style="background-color: #e96b56;
@@ -393,7 +392,7 @@ tbody tr {
                                 <li><a href="{% url 'view_tenants' %}">Tenant View</a></li>
                                 <li><a href="{% url 'allocated_property_view' %}">Property View</a></li>
                                 <li><a href="{% url 'add_visit' %}">Add Visit</a></li>
-                                <li><a onclick='addrentclick()'>Add Rent</a></li>
+                                <li><a style="cursor:pointer" onclick='addrentclick()'>Add Rent</a></li>
                                 
                             </ul>
 

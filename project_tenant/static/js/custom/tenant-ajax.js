@@ -875,3 +875,8 @@ $('#addrent').live('click',function(){
     tid=$('#tenantid').val()
     location.href = '/agent/add_rent/?tid='+tid;
 })
+
+$('.allocation_details').live('click',function(){
+    pid=$(this).attr('data-pid');
+    location.href='/agent/viewallocationDetails/?pid='+pid;
+})

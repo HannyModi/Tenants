@@ -1779,8 +1779,12 @@ def add_rent_collected(request):
         print(result)        
         if last_paid is not None:
             last_paid = last_paid.strftime("%B, %Y") 
-        
-        return render(request,'agent/add_rent.html',{'propertyobj':propertyobj,'rentdetails':rentdetails,'months':result, 'last_paid':last_paid})
+        upflag=False
+        for r in result:
+            if "Unpaid" in r:
+                upflag=True
+        print("\n\nUnpaid Flag",upflag)
+        return render(request,'agent/add_rent.html',{'propertyobj':propertyobj,'rentdetails':rentdetails,'months':result, 'last_paid':last_paid, 'unpaidflag':upflag})
     
     elif request.method == 'POST':
         for k in request.POST.keys():
@@ -1836,3 +1840,55 @@ def getAllocatedtenants(request):
                 +">" + tenant.pa_tenant.tn_name \
                 + "</option>"
     return HttpResponse(response)   
+
+@for_staff
+def viewallocationDetails(request):
+    if 'pid' in request.GET.keys():
+        allocatedproperty=TblProperty.objects.get(id=request.GET['pid'],pr_is_allocated=True)
+        allocation=TblPropertyAllocation.objects\
+            .filter(pa_property=allocatedproperty,pa_is_allocated=True)\
+            .select_related('pa_property__pr_master__cln_master')\
+            .select_related('pa_tenant')
+        
+        # print(allocation.values())
+        pr=[]
+        for a in allocation:
+            pr=a
+        rentdetails=TblRentCollection.objects.filter(rc_allocation=pr)
+        # length = (len(rentdetails.values()))
+        print("\n\nRent Details:",rentdetails)
+       
+        i=pr.pa_agreement_date
+        # print("start",i)
+        # print("end",propertyobj.pa_agreement_end_date)
+        months=[]
+        delta = timedelta(days=30)
+        while i < pr.pa_agreement_end_date:
+            # print("i",i)
+            months.append(i.strftime("%B, %Y"))
+            # print(i.strftime("%B")) 
+            i+=delta
+        result=[]
+        
+        recorded = False
+        for m in months:
+            if (len(rentdetails.values()) > 0):
+                rent=False
+                for r in rentdetails:
+                    if m == r.rc_month.strftime("%B, %Y"):
+                        rent=True
+                        break
+                if rent:
+                    result.append([m,"Paid"])
+                else:
+                    if not recorded:
+                        recorded = True
+                    result.append([m,"Unpaid"])
+            else:
+                result.append([m,"Unpaid"])
+        upflag=False
+        for r in result:
+            if "Unpaid" in r:
+                upflag=True
+        print("\n\nUnpaid Flag",upflag)
+        return render(request,'agent/allocation_details.html',{'allocation':pr,'months':result,'unpaidflag':upflag})

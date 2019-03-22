@@ -34,5 +34,6 @@ urlpatterns = [
     path('check_allocation/', views.check_allocation, name='check_allocation'),
     path('view_visits/', views.view_visit, name='view_visit'),
     path('getAllocatedtenants/',views.getAllocatedtenants),
+    path('viewallocationDetails/',views.viewallocationDetails),
 
 ]
