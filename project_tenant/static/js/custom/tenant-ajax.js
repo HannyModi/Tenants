@@ -847,6 +847,17 @@ $('.add_rent').live('click', function () {
     };
 })
 
+$('.view_visit').live('click', function () {
+    $.get('/agent/view_visits/', { status: $(this).attr('data-req'),year: $('#visit_year').val() },function(data)
+    {
+        $('#visitlist').html(data)
+    });
+   
+})
+
+$("#visit_year").change(function () {
+    location.href = '/agent/view_visits/?year='+$(this).val();
+});
 
 function addrentclick(){
     // alert("Hello")
