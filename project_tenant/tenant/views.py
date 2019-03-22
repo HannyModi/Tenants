@@ -1835,6 +1835,4 @@ def getAllocatedtenants(request):
             response+="<option value=" + str(tenant.pa_tenant.id)\
                 +">" + tenant.pa_tenant.tn_name \
                 + "</option>"
-        
-    
     return HttpResponse(response)   
