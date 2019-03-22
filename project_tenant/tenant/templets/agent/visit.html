@@ -38,7 +38,7 @@
                                 </td>
 
                                 <td colspan="2">{{ visit.vs_address }}</td>
-                                <td>{{ visit.vs_date|date:'F, Y'}}</td>
+                                <td>{{ visit.vs_date }}</td>
                                 <td>
                                     {% if visit.vs_intrest_status == 1  %}
                                     Interested
@@ -86,7 +86,7 @@
                         </td>
 
                         <td colspan="2">{{ visit.vs_address }}</td>
-                        <td>{{ visit.vs_date|date:'F, Y'}}</td>
+                        <td>{{ visit.vs_date }}</td>
                         <td>
                             {% if visit.vs_intrest_status == 1  %}
                             Interested

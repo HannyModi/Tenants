@@ -1227,8 +1227,6 @@ def TenantDetails(request, tid):
 
 
 '''To make tenant deactivate'''
-
-
 # @for_staff
 # def change_tenant_status(request):
 #     tenant = TblTenant.objects.get(id=request.POST['tid'])
@@ -1323,19 +1321,21 @@ def get_Tenant_list(request):
             # for p in plist:
             # print(p.msp_name)
             context = {'ten': ten, 'plist': plist, 'page': "tdetails"}
-    else:
-        Tenant_list = TblTenant.objects.filter(
-            tn_is_active=True, tn_agent_id=request.user, tn_status=1)
-        plist = TblProperty.objects\
-            .select_related('pr_master')\
-            .select_related('pr_master__cln_master')\
-            .filter(
-                pr_master__in=TblAgentAllocation.objects
-                .filter(al_agent=request.user).values('al_master'),
-                pr_is_active=True,
-                pr_is_allocated=False)
-        # agent_id=request.user, pr_is_active=True, pr_is_allocated=False)
-        context = {'Tenant_list': Tenant_list, 'plist': plist, }
+    # else:
+    #     Tenant_list = TblTenant.objects.filter(
+    #         tn_is_active=True, tn_agent_id=request.user, tn_status=1)
+    #     plist = TblProperty.objects\
+    #         .select_related('pr_master')\
+    #         .select_related('pr_master__cln_master')\
+    #         .filter(
+    #             pr_master__in=TblAgentAllocation.objects
+    #             .filter(al_agent=request.user).values('al_master'),
+    #             pr_is_active=True,
+    #             pr_is_allocated=False)
+    #     print("\n\n\n\n\n\n",plist.values())
+    #     print("\n\n\n")
+    #     # agent_id=request.user, pr_is_active=True, pr_is_allocated=False)
+    #     context = {'Tenant_list': Tenant_list, 'plist': plist, }
     return render(request, 'agent/allocate_property.html',
                   context)
 
@@ -1888,11 +1888,7 @@ def check_allocation(request):
             return HttpResponse("1")
         else:
             return HttpResponse("0")
-            propertyobj=TblPropertyAllocation.objects.select_related('pa_property').select_related('pa_tenant').get(pa_property=request.GET['pid'],pa_is_allocated=True)
-            if propertyobj.pa_tenant.tn_status == 3:
-                return HttpResponse("1")
-            else:
-                return HttpResponse("0")
+        
 
 
 

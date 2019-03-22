@@ -301,7 +301,7 @@ tbody tr {
                                                             <li><a href="">View Rent Details</a></li>
                                                         </ul>
                                                 </li>
-                                            <li><a href="{% url 'get_Tenant_list' %}">Allocate Property</a></li>
+                                            {% comment %} <li><a href="{% url 'get_Tenant_list' %}">Allocate Property</a></li> {% endcomment %}
                                             <li><a href="{% url 'add_visit' %}">Record a Visit</a></li>
                                             
 
@@ -369,7 +369,7 @@ tbody tr {
                     </div>
                     <div class="modal-footer">
                         <center>  <button class="btn btn-info btn-rounded " id="addrent">Add Rent</button>
-                            <button class="btn btn-danger btn-rounded " id="close">Cancel</button></center>
+                            <button class="btn btn-danger btn-rounded close1" id="close">Cancel</button></center>
                     </div>
                     </div>
                 

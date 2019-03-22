@@ -385,14 +385,14 @@ $('#save').click(function () {
 
 });
 
-$('.close').click(function () {
-    $('#myModal').css('display', 'none')
-    $('#imgDiv').css('display', 'none')
+$('.close').live('click',function () {
+    $('#myModal').css('display', 'none');
+    $('#imgDiv').css('display', 'none');
     $('#mymodalforaddrent').css('display', 'none');
 });
 
-$('#close').click(function () {
-    $('#myModal').css('display', 'none')
+$('#close,#close1').live('click',function () {
+    $('#myModal').css('display', 'none');
     $('#mymodalforaddrent').css('display', 'none');
 });
 
@@ -454,8 +454,6 @@ $('.delete_master').live('click', function () {
 
 function manage_form() {
     $('#move_to option').attr('selected', 'selected')
-    // alert('donr')
-
 }
 
 
@@ -485,7 +483,7 @@ $(document).ready(function () {
     }
 });
 
-$(".allocate_tenant").click(function () {
+$(".allocate_tenant").live('click',function () {
     if ($(this).attr('data-pid')) {
         pid = $(this).attr('data-pid');
         location.href = '/agent/get_Tenant_list/?pid=' + pid + '&page=' + 'pdetails';
@@ -496,7 +494,7 @@ $(".allocate_tenant").click(function () {
     }
 });
 
-$('.deallocate_tenant').click(function () {
+$('.deallocate_tenant').live('click',function () {
     if ($(this).attr('data-tid')) {
         tid = $(this).attr('data-tid');
         $.get('/agent/deallocate_property/', { tenant: tid }, function (data) {
@@ -835,7 +833,7 @@ $('.add_rent').live('click', function () {
             location.href = '/agent/add_rent/?pid='+pid;
         }
         else{
-            alert("This Propert's Agreement is under Process.");
+            alert("This Property's Agreement is under Process.");
         }
     });
    
