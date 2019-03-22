@@ -818,7 +818,7 @@ def property_soldout(request):
         obj_pr.pr_is_allocated = False
         obj_pr.save()
         pAllocation = TblPropertyAllocation.objects.get(
-            pa_property=pobj, pa_is_allocated=True)
+            pa_property=obj_pr, pa_is_allocated=True)
         print(type(pAllocation))
         pAllocation.pa_tenant.tn_status = 0
         pAllocation.pa_tenant.save()
@@ -1832,7 +1832,7 @@ def add_rent_collected(request):
             if (len(rentdetails.values()) > 0):
                 rent = False
                 for r in rentdetails:
-                    print("\n\naya")
+                    # print("\n\naya")
                     if m == r.rc_month.strftime("%B, %Y"):
                         rent = True
                         # print("Except")
@@ -1884,3 +1884,41 @@ def check_allocation(request):
             return HttpResponse("1")
         else:
             return HttpResponse("0")
+            propertyobj=TblPropertyAllocation.objects.select_related('pa_property').select_related('pa_tenant').get(pa_property=request.GET['pid'],pa_is_allocated=True)
+            if propertyobj.pa_tenant.tn_status == 3:
+                return HttpResponse("1")
+            else:
+                return HttpResponse("0")
+
+
+
+@for_staff
+def getAllocatedtenants(request):
+    response=""
+    if 'tenantid' in request.GET.keys():
+        tenant=TblTenant.objects.get(id=request.GET['tenantid'])
+        allocatedproperty=TblPropertyAllocation.objects\
+            .filter(pa_tenant=tenant,pa_is_allocated=True)\
+            .select_related('pa_tenant')\
+            .select_related('pa_property__pr_master__cln_master')
+        print(allocatedproperty)
+        for allocation in allocatedproperty:
+            response=allocation.pa_property.pr_address+" " \
+                    + allocation.pa_property.pr_master.cln_master.msp_name + " "\
+                    + allocation.pa_property.pr_master.cln_master.msp_address
+
+    else:
+        tenantlist=TblPropertyAllocation.objects\
+            .filter(pa_is_allocated=True).filter(~Q(pa_agreement_date=None))\
+            .select_related('pa_tenant')\
+            .select_related('pa_property__pr_master__cln_master')
+        print(tenantlist)
+
+        response+="""<option value="" selected="selected">Select Tenant</option>"""
+        for tenant in tenantlist:
+            response+="<option value=" + str(tenant.pa_tenant.id)\
+                +">" + tenant.pa_tenant.tn_name \
+                + "</option>"
+        
+    
+    return HttpResponse(response)   

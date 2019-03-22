@@ -297,7 +297,7 @@ tbody tr {
                                         <ul class="dropdown-menu">
                                                 <li><a href="">Rent <i class="icon-angle-right"></i></a>
                                                     <ul class="dropdown-menu sub-menu-level1">
-                                                            <li><a href="{% url 'add_rent' %}">Add Rent Details</a></li>
+                                                            <li><a onclick='addrentclick()'>Add Rent Details</a></li>
                                                             <li><a href="">View Rent Details</a></li>
                                                         </ul>
                                                 </li>
@@ -336,6 +336,47 @@ tbody tr {
         </header>
 
         <!-- end header -->
+
+
+            <!--Modal Starts-->
+            <div id="mymodalforaddrent" class="modal">
+
+            <!-- Modal content -->
+{% comment %} putind modal for selecting tenant or property to add rent {% endcomment %}
+            <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Add Rent</h4>
+                    </div>
+                    <div class="modal-body">
+                            
+                            Tenant Name : <select name="status" id="tenantid" style="width:100%" required>               
+                            {% comment %} <option value="0">Property Not Allocated</option>
+                            <option value="1">Visit</option>
+                            <option value="2">Deal Accepted,aggrement under process</option>
+                            <option value="3">Property handovered</option> {% endcomment %}
+                            </select>
+                            
+                            </br>
+                            </br>
+
+                            Property Name : <input type="text" disabled id="allocated_property_name" style="width:100%" class="hidden" /></br></br>
+                    </div>
+                    <div class="modal-footer">
+                        <center>  <button class="btn btn-info btn-rounded " id="addrent">Add Rent</button>
+                            <button class="btn btn-danger btn-rounded " id="close">Cancel</button></center>
+                    </div>
+                    </div>
+                
+                </div> 
+            </div>
+            <!--Modal Ends--> 
+
+
+
         {% block bodyblock %}
         {% endblock %}
             <footer>
@@ -349,7 +390,7 @@ tbody tr {
                                 <li><a href="{% url 'view_tenants' %}">Tenant View</a></li>
                                 <li><a href="{% url 'allocated_property_view' %}">Property View</a></li>
                                 <li><a href="{% url 'add_visit' %}">Add Visit</a></li>
-                                <li><a href="#">Add Rent</a></li>
+                                <li><a onclick='addrentclick()'>Add Rent</a></li>
                                 
                             </ul>
 

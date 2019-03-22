@@ -69,6 +69,6 @@ urlpatterns = [
 
     # Viewing all visits to property.
     path('view_visits/', views.view_visit, name='view_visit'),
-
+    path('getAllocatedtenants/',views.getAllocatedtenants),
 
 ]
