@@ -495,36 +495,39 @@ $(".allocate_tenant").live('click',function () {
 });
 
 $('.deallocate_tenant').live('click',function () {
-    if ($(this).attr('data-tid')) {
-        tid = $(this).attr('data-tid');
-        $.get('/agent/deallocate_property/', { tenant: tid }, function (data) {
-            if (data == "1") {
-                status = "Property Deallocated";
-                localStorage.setItem("Status", status);
-                location.reload('/agent/ViewTenants/');
-            }
-            else {
-                $.notify("Error occured while Deallocation", "error")
+    if (confirm("Are you sure you want to deallocate Property?")){
+        if ($(this).attr('data-tid')) {
+            
+            tid = $(this).attr('data-tid');
+            $.get('/agent/deallocate_property/', { tenant: tid }, function (data) {
+                if (data == "1") {
+                    status = "Property Deallocated";
+                    localStorage.setItem("Status", status);
+                    location.reload('/agent/ViewTenants/');
+                }
+                else {
+                    $.notify("Error occured while Deallocation", "error")
 
-            }
-        });
-    }
-    if ($(this).attr('data-pid')) {
-        pid = $(this).attr('data-pid');
-        $.get('/agent/deallocate_property/', { property: pid }, function (data) {
-            if (data) {
-                status = "Property Deallocated";
-                localStorage.setItem("Status", status);
-                location.reload('/agent/Agent_Properties/');
-            }
-            else {
+                }
+            });
+        }
+        if ($(this).attr('data-pid')) {
+            pid = $(this).attr('data-pid');
+            $.get('/agent/deallocate_property/', { property: pid }, function (data) {
+                if (data) {
+                    status = "Property Deallocated";
+                    localStorage.setItem("Status", status);
+                    location.reload('/agent/Agent_Properties/');
+                }
+                else {
 
-                $.notify("Error occured while Deallocation", "error")
+                    $.notify("Error occured while Deallocation", "error")
 
-            }
+                }
 
-        });
-    }
+            });
+        }
+}
 });
 
 
@@ -888,4 +891,35 @@ $('#addrent').live('click',function(){
 $('.allocation_details').live('click',function(){
     pid=$(this).attr('data-pid');
     location.href='/agent/viewallocationDetails/?pid='+pid;
+})
+
+
+$('.deactivate').live('click', function () {
+    if(confirm("Are you sure you want to deactivate this Tenant ?")){
+    var id = $(this).attr('data-id')
+    $.get('/Agent/activation_change_tenant/', { id: id, change: 'deactivate' }, function (data) {
+        if (data == "Done") {
+            status = "Tenant Dectivated";
+            localStorage.setItem("Status", status);
+            location.reload('/Agent/ViewTenants/');
+        }
+        else
+            $.notify('Error occured during deactivation', 'error');
+    })
+}
+})
+
+$('.activate').live('click', function () {
+    if(confirm("Are you sure you want to activate this Tenant Again?")){
+    var id = $(this).attr('data-id')
+    $.get('/Agent/activation_change_tenant/', { id: id, change: 'activate' }, function (data) {
+        if (data == 'Done') {
+            status = "Tenant Activated";
+            localStorage.setItem("Status", status);
+            location.reload('/Agent/ViewTenants/');
+        }
+        else
+            $.notify('Error occured during deactivation', 'error');
+    })
+}
 })

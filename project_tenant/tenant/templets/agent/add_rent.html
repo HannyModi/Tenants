@@ -25,30 +25,34 @@ Add Rent
             <div class="span6">
                 <div style="background-image: url('images/bg-01.jpg');">
                     {% if propertyobj %}
-                    <form enctype="multipart/form-data" class="contactForm" method="POST" action="{% url 'add_rent' %}">
-                        {% comment %} action="{% url 'allocate_property' %}" > {% endcomment %}
-                        {% csrf_token %}
-                        <input type="hidden" name="allocationid" value="{{ propertyobj.id }}" />
-                        <label> Property :</label> 
-                        <input type="text" id="pr_address" value="{{ propertyobj.pa_property.pr_address }}, {{ propertyobj.pa_property.pr_master.cln_master.msp_name }}, {{ propertyobj.pa_property.pr_master.cln_master.msp_address }}" disabled /></br>
-                        <label>
-                        Tenant Name :</label>
-                        <input type="text" id="tn_name" disabled name="tenantname" value="{{ propertyobj.pa_tenant.tn_name }}"/><br/>
-                        <label>
-                        Property Rent :</label>
-                        <input type="text" disabled name="property_rent" value="{{ propertyobj.pa_final_rent }}"/><br/>
-                        <label>
-                        <input type="hidden" name="payofmonth" value="{{ last_paid }}" />
-
-                        Rent Of Month :</label>
-                        <input type="text" disabled name="rentmonth" id="rentmonth" value="{{last_paid}}"/><br/>
-                        <label>
-                        Receipt Number :</label>
-                        <input type="number" class="decimal_input" style="width:100%" name="reciptno" id="receiptno" /><br/>
-                        Upload Receipt :</label>
-                        <input type="file" accept="image/gif, image/jpeg, image/png" id="receiptpic" name="reciptpic" /><br/><br/>
-                        {% if unpaidflag == True %}<center><button type="submit" class="btn btn-rounded btn-theme" value="submit">Add Rent</center>{% endif%}
-                    </form>
+                       
+                          <form enctype="multipart/form-data" class="contactForm" method="POST" action="{% url 'add_rent' %}">
+                              {% comment %} action="{% url 'allocate_property' %}" > {% endcomment %}
+                              {% csrf_token %}
+                              <input type="hidden" name="allocationid" value="{{ propertyobj.id }}" />
+                              <label> Property :</label> 
+                              <input type="text" id="pr_address" value="{{ propertyobj.pa_property.pr_address }}, {{ propertyobj.pa_property.pr_master.cln_master.msp_name }}, {{ propertyobj.pa_property.pr_master.cln_master.msp_address }}" disabled /></br>
+                              <label>
+                              Tenant Name :</label>
+                              <input type="text" id="tn_name" disabled name="tenantname" value="{{ propertyobj.pa_tenant.tn_name }}"/><br/>
+                              <label>
+                              Property Rent :</label>
+                              <input type="text" disabled name="property_rent" value="{{ propertyobj.pa_final_rent }}"/><br/>
+                              <label>
+                              <input type="hidden" name="payofmonth" value="{{ last_paid }}" />
+                               {% if unpaidflag == True %}
+                              Rent Of Month :</label>
+                              <input type="text" disabled name="rentmonth" id="rentmonth" value="{{last_paid}}"/><br/>
+                              <label>
+                              Receipt Number :</label>
+                              <input type="number" class="decimal_input" style="width:100%" name="reciptno" id="receiptno" /><br/>
+                              Upload Receipt :</label>
+                              <input type="file" accept="image/gif, image/jpeg, image/png" id="receiptpic" name="reciptpic" /><br/><br/>
+                              <center><button type="submit" class="btn btn-rounded btn-theme" value="submit">Add Rent</center>
+                          </form>
+                          {% else %}
+                          <strong>All rent of this allocation is paid. <strong>  
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

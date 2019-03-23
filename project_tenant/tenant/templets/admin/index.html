@@ -1,0 +1,61 @@
+{% extends 'agent/Base.html' %}
+{% load staticfiles %}
+{% block titleblock %}
+Admin/Home
+{% endblock %}
+{% block bodyblock %}
+<section id="inner-headline">
+    <div class="container">
+        <div class="row">
+            <div class="span12">
+                <div class="inner-heading">
+                    <ul class="breadcrumb">
+                        <li><a href="{% url 'agent_index' %}"><i class="icon-home"></i> Home</a> 
+                    </ul>
+                    <h2>Home</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="container">
+    <div class="container">
+        <div class="row">
+            <div class="span10">
+                <div id="container"></div>
+                    <script src="https://code.highcharts.com/highcharts.src.js"></script>
+                        <script>
+                            Highcharts.chart('container', {
+                                chart: {
+                                    type: 'column'
+                                },
+                                title: {
+                                    text: 'Property Details'
+                                },
+                                xAxis: {
+                                    categories: [
+                                        {% for entry in msp_list %}'{{ entry.msp_name }} Class'{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    ]
+                                },
+                                series: [{
+                                    name: 'Allocated Properties',
+                                    data: [
+                                        {% for entry in msp_list %}{{ entry.allocated_properties }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    ],
+                                    color: 'green'
+                                }, {
+                                    name: 'Unallocated Properties',
+                                    data: [
+                                        {% for entry in msp_list %}{{ entry.unallocated_properties }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    ],
+                                    color:'orange'
+                                }]
+                            });
+                        </script>
+            </div>    
+        </div>
+    </div>
+</section>
+
+{% endblock %}

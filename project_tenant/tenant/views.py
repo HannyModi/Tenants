@@ -132,7 +132,35 @@ def do_login(request):
 # Admin index view
 @for_admin
 def admin_index(request):
-    return render(request, 'admin/base.html')
+    msp_list = TblMasterProperty.objects.all()\
+        .annotate(
+            no_of_clones=Count('tblmasterpropertyclone',
+                               distinct=True))\
+        .annotate(
+            unallocated_clones=Count(
+                'tblmasterpropertyclone', distinct=True,
+                filter=Q(
+                    tblmasterpropertyclone__cln_is_allocated=False)))\
+        .annotate(
+            allocated_clones=Count(
+                'tblmasterpropertyclone', distinct=True,
+                filter=Q(
+                    tblmasterpropertyclone__cln_is_allocated=True)))\
+        .annotate(
+            no_of_property=Count(
+                'tblmasterpropertyclone__tblproperty'))\
+        .annotate(
+            unallocated_properties=Count(
+                'tblmasterpropertyclone__tblproperty',
+                filter=Q(
+                    tblmasterpropertyclone__tblproperty__pr_is_allocated=False)))\
+        .annotate(
+            allocated_properties=Count(
+                'tblmasterpropertyclone__tblproperty',
+                filter=Q(
+                    tblmasterpropertyclone__tblproperty__pr_is_allocated=True)))
+
+    return render(request, 'admin/index.html',{'msp_list':msp_list})
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
