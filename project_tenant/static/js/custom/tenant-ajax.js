@@ -385,15 +385,8 @@ $('#save').click(function () {
 
 });
 
-$('.close').click(function () {
-    $('#myModal').css('display', 'none')
-    $('#imgDiv').css('display', 'none')
-    $('#mymodalforaddrent').css('display', 'none');
-});
-
-$('#close').click(function () {
-    $('#myModal').css('display', 'none')
-    $('#mymodalforaddrent').css('display', 'none');
+$('.close,#close,#close1').click(function () {
+    $(this).closest('.modal,.modal2').css('display', 'none');
 });
 
 $('.deallocate_clone').live('click', function () {
@@ -890,4 +883,19 @@ $('#addrent').live('click',function(){
 $('.allocation_details').live('click',function(){
     pid=$(this).attr('data-pid');
     location.href='/agent/viewallocationDetails/?pid='+pid;
+})
+
+$('.renew_agreement').live('click',function(){
+    $.get('/agent/tenant_status_change', { id: $(this).attr('data-id'), status: 2, update: true ,}, function (data) {
+        if (data == '1') {
+            status = "Agreement renew process recorded.";
+            localStorage.setItem("Status", status);
+            location.reload();
+            $(this).remove();
+            // $.notify("Tenant updated","success")
+        }
+        else {
+            $.notify("Error occured while updating Tenant Status", "error")
+        }
+    });
 })

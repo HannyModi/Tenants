@@ -117,8 +117,14 @@ Agent List
                                                             <div class="dropdown-content">
                                                             <a data-pid='{{property.id}}' data-toggle="tooltip" title="Deallocate Tenant to Property" class="deallocate_tenant"> Deallocate </a>
                                                             <a data-pid='{{property.id}}'data-toggle="tooltip" title="View Allocation Details" class="allocation_details"> Details </a>
-                                                            <a data-pid='{{property.id}}' class="add_rent" data-toggle="tooltip" title="Add Rent">Rent</a>
-                                                            <a>Renew Agreement</a>
+                                                            <a href='/agent/add_rent/?pid={{property.id}}' piddata-toggle="tooltip" title="Add Rent">Rent</a>
+                                                            {% if property.pr_tenant %}
+                                                                {% if property.pr_status == 3 %}
+                                                                    <a class="renew_agreement" data-id='{{ property.pr_tenant }}' data-toggle="tooltip" title="Register new agreement process for this property ">Renew Agreement</a>
+                                                                {% else %}
+                                                                    <a class="allocate_tenant" data-tid='{{ property.pr_tenant }}' data-toggle="tooltip" title="Update the agreement Details ">Update Agreement</a>
+                                                                {% endif %}
+                                                            {% endif %}
                                                             </div>
                                                             </div>
                                                             {% else %}
@@ -166,8 +172,14 @@ Agent List
                                                                     <div class="dropdown-content">
                                                                     <a data-pid='{{property.id}}' data-toggle="tooltip" title="Deallocate Tenant to Property" class="deallocate_tenant"> Deallocate </a>
                                                                     <a data-pid='{{property.id}}'data-toggle="tooltip" title="View Allocation Details" class="allocation_details"> Details </a>
-                                                                    <a data-pid='{{property.id}}' class="add_rent" data-toggle="tooltip" title="Add Rent">Rent</a>
-                                                                    <a> Renew Agreement </a>
+                                                                    <a href='/agent/add_rent/?pid={{property.id}}' piddata-toggle="tooltip" title="Add Rent">Rent</a>
+                                                                    {% if property.pr_tenant %}
+                                                                        {% if property.pr_status == 3 %}
+                                                                            <a class="renew_agreement" data-id='{{ property.pr_tenant }}' data-toggle="tooltip" title="Register new agreement process for this property ">Renew Agreement</a>
+                                                                        {% else %}
+                                                                            <a class="allocate_tenant" data-tid='{{ property.pr_tenant }}' data-toggle="tooltip" title="Update the agreement Details ">Update Agreement</a>
+                                                                        {% endif %}
+                                                                    {% endif %}
                                                                     </div>
                                                                     </div>
                                                                     {% else %}  <a class="allocate_tenant" data-toggle="tooltip" title="Allocate Tenant to Property" data-pid="{{property.id}}" >Allocate <i class='icon-angle-right'></i></a></i> {% endif %}</td>
