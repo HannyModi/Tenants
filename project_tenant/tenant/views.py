@@ -1154,26 +1154,49 @@ def allocated_property_list(request):
     allocated_pr = []
     if 'propertytype' in request.GET.keys():
         propertytype = request.GET['propertytype']
+
         if propertytype == "Allocatedproperty":
-            allocated_mpr = TblMasterProperty.objects.filter(pk__in=TblAgentAllocation.objects.filter(
-                al_agent=request.user,
-                al_master__in=TblProperty.objects.filter(pr_is_allocated=True).order_by('pr_master').distinct('pr_master').values('pr_master'))
-                .select_related('al_master').values('al_master__cln_master'))
-        # print(allocated_mpr.values())
+            allocated_mpr = TblMasterProperty.objects.filter(
+                pk__in=TblAgentAllocation.objects
+                .filter(al_agent=request.user,
+                        al_master__in=TblProperty.objects
+                        .filter(pr_is_allocated=True)
+                        .order_by('pr_master').distinct('pr_master')
+                        .values('pr_master'))
+                .select_related('al_master')
+                .values('al_master__cln_master'))
 
             allocated_pr = TblProperty.objects\
                 .select_related('pr_master')\
                 .select_related('pr_master__cln_master')\
                 .filter(
                     pr_master__in=TblAgentAllocation
-                    .objects.filter(al_agent=request.user).values('al_master'), pr_is_allocated=True)
-            print(allocated_pr.values())
+                    .objects.filter(al_agent=request.user)
+                    .values('al_master'), pr_is_allocated=True)\
+                .annotate(
+                    pr_tenant=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant'))
+                ).annotate(
+                    pr_status=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant__tn_status')[:1])
+                )
+            # print(allocated_pr.values())
 
         elif propertytype == "Unallocatedproperty":
-            allocated_mpr = TblMasterProperty.objects.filter(pk__in=TblAgentAllocation.objects.filter(
-                al_agent=request.user,
-                al_master__in=TblProperty.objects.filter(pr_is_allocated=False).order_by('pr_master').distinct('pr_master').values('pr_master'))
-                .select_related('al_master').values('al_master__cln_master'))
+            allocated_mpr = TblMasterProperty.objects\
+                .filter(pk__in=TblAgentAllocation.objects.filter(
+                    al_agent=request.user,
+                    al_master__in=TblProperty.objects.filter(
+                        pr_is_allocated=False).order_by('pr_master')
+                    .distinct('pr_master').values('pr_master'))
+                    .select_related('al_master')
+                    .values('al_master__cln_master'))
             # print(allocated_mpr.values())
 
             allocated_pr = TblProperty.objects\
@@ -1181,14 +1204,32 @@ def allocated_property_list(request):
                 .select_related('pr_master__cln_master')\
                 .filter(
                     pr_master__in=TblAgentAllocation
-                    .objects.filter(al_agent=request.user).values('al_master'), pr_is_allocated=False)
-            print(allocated_pr.values())
+                    .objects.filter(al_agent=request.user)
+                    .values('al_master'), pr_is_allocated=False)\
+                .annotate(
+                    pr_tenant=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant'))
+                ).annotate(
+                    pr_status=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant__tn_status')[:1])
+                )
+            # print(allocated_pr.values())
 
         elif propertytype == "all":
-            allocated_mpr = TblMasterProperty.objects.filter(pk__in=TblAgentAllocation.objects.filter(
-                al_agent=request.user,
-                al_master__in=TblProperty.objects.all().order_by('pr_master').distinct('pr_master').values('pr_master'))
-                .select_related('al_master').values('al_master__cln_master'))
+            allocated_mpr = TblMasterProperty.objects.filter(
+                pk__in=TblAgentAllocation.objects.filter(
+                    al_agent=request.user,
+                    al_master__in=TblProperty.objects.all()
+                    .order_by('pr_master').distinct('pr_master')
+                    .values('pr_master'))
+                .select_related('al_master')
+                .values('al_master__cln_master'))
         # print(allocated_mpr.values())
 
             allocated_pr = TblProperty.objects\
@@ -1196,13 +1237,37 @@ def allocated_property_list(request):
                 .select_related('pr_master__cln_master')\
                 .filter(
                     pr_master__in=TblAgentAllocation
-                    .objects.filter(al_agent=request.user).values('al_master'))
-            print(allocated_pr.values())
-        return render(request, 'agent/property.html', {'allocated_pr': allocated_pr, 'allocated_mpr': allocated_mpr, 'propertytype': propertytype})
+                    .objects.filter(al_agent=request.user)
+                    .values('al_master'))\
+                .annotate(
+                    pr_tenant=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant'))
+                ).annotate(
+                    pr_status=Subquery(
+                        TblPropertyAllocation.objects
+                        .filter(pa_property=OuterRef('pk'),
+                                pa_is_allocated=True)
+                        .values('pa_tenant__tn_status')[:1])
+                )
+            # for p in allocated_pr:
+            #     print(p.tn_status)
+            # # print(allocated_pr.values())
+        for p in allocated_pr:
+            print(p.pr_tenant, p.pr_status)
+        return render(request, 'agent/property.html',
+                      {'allocated_pr': allocated_pr,
+                       'allocated_mpr': allocated_mpr,
+                       'propertytype': propertytype})
 
-    allocated_mpr = TblMasterProperty.objects.filter(pk__in=TblAgentAllocation.objects.filter(
-        al_agent=request.user,
-        al_master__in=TblProperty.objects.all().order_by('pr_master').distinct('pr_master').values('pr_master'))
+    allocated_mpr = TblMasterProperty.objects.filter(
+        pk__in=TblAgentAllocation.objects.filter(
+            al_agent=request.user,
+            al_master__in=TblProperty.objects.all()
+            .order_by('pr_master').distinct('pr_master')
+            .values('pr_master'))
         .select_related('al_master').values('al_master__cln_master'))
     # print(allocated_mpr.values())
 
@@ -1211,10 +1276,28 @@ def allocated_property_list(request):
         .select_related('pr_master__cln_master')\
         .filter(
             pr_master__in=TblAgentAllocation
-            .objects.filter(al_agent=request.user).values('al_master'))
+            .objects.filter(al_agent=request.user)
+            .values('al_master'))\
+        .annotate(
+            pr_tenant=Subquery(
+                TblPropertyAllocation.objects
+                .filter(pa_property=OuterRef('pk'),
+                        pa_is_allocated=True)
+                .values('pa_tenant'))
+        ).annotate(
+            pr_status=Subquery(
+                TblPropertyAllocation.objects
+                .filter(pa_property=OuterRef('pk'),
+                        pa_is_allocated=True)
+                .values('pa_tenant__tn_status')[:1])
+        )
     # print(allocated_pr.values())
+    for p in allocated_pr:
+        print(p.pr_tenant, p.pr_status)
 
-    return render(request, 'agent/agent_property.html', {'allocated_pr': allocated_pr, 'allocated_mpr': allocated_mpr})
+    return render(request, 'agent/agent_property.html',
+                  {'allocated_pr': allocated_pr,
+                   'allocated_mpr': allocated_mpr})
 
 
 # @for_staff
@@ -1240,12 +1323,16 @@ def TenantDetails(request, tid):
 
     tenant = TblTenant.objects.get(id=tid)
     history = TblPropertyAllocation.objects.filter(
-        pa_tenant=tenant).select_related('pa_property__pr_master__cln_master')
+        pa_tenant=tenant)\
+        .select_related('pa_property__pr_master__cln_master')
     print(history.values())
     for h in history:
         if h.pa_is_allocated == True:
             count = 0
-    return render(request, 'agent/view_tenant_detail.html', {'tenant': tenant, 'history': history, 'count': count, })
+    return render(request, 'agent/view_tenant_detail.html',
+                  {'tenant': tenant,
+                   'history': history,
+                   'count': count, })
 
 
 # redirect to agent home
@@ -1276,7 +1363,6 @@ def tenant_search_result(request):
         if request.method == 'GET':
             if 'suggestion' in request.GET.keys():
                 status = request.GET['status']
-                user = request.user
                 starts_with = request.GET['suggestion']
                 tenantlist = tenant_search(request, starts_with, status)
             # print("\nTenant list:\n", tenantlist)
@@ -1341,8 +1427,8 @@ def get_Tenant_list(request):
                 vs_property__pr_is_allocated=False,
                 vs_property__pr_is_active=True,
                 vs_property__pr_master__in=TblAgentAllocation
-                            .objects.filter(al_agent=request.user)
-                            .values('al_master'),
+                .objects.filter(al_agent=request.user)
+                .values('al_master'),
             )\
                 .distinct('vs_property')\
                 .order_by('vs_property')
@@ -1504,7 +1590,8 @@ def get_tenant_visit(request):
             response += "<option  value="+str(visit.vs_property.id)\
                 + "> " + visit.vs_property.pr_address+" " \
                 + visit.vs_property.pr_master.cln_master.msp_name + " "\
-                + visit.vs_property.pr_master.cln_master.msp_address + " | Rent: " + str(visit.vs_property.pr_rent)\
+                + visit.vs_property.pr_master.cln_master.msp_address +\
+                "  Rent: " + str(visit.vs_property.pr_rent)\
                 + " </option>"
         return HttpResponse(response)
     else:
@@ -1611,21 +1698,24 @@ def change_status(request):
                         pa_tenant=tenant,
                         pa_is_allocated=True,
                     )
-                    new_allocation = allocation
-                    new_allocation.pk = None
-                    new_allocation.pa_agreement_date = None
-                    new_allocation.pa_agreement_date_end = None
-                    new_allocation.pa_acceptance_letter = None
-                    new_allocation.pa_tenancy_agreement = None
-                    new_allocation.pa_final_rent = None
-                    new_allocation.save()
-
-                    # allocation.pa_property.pr_is_allocated = False
-                    # allocation.pa_property.save()
                     allocation.pa_tenant.tn_status = '2'
                     allocation.pa_tenant.save()
                     allocation.pa_is_allocated = False
                     allocation.save()
+
+                    new_allocation = allocation
+                    new_allocation.pk = None
+                    new_allocation.pa_agreement_date = None
+                    new_allocation.pa_agreement_end_date = None
+                    new_allocation.pa_acceptance_letter = None
+                    new_allocation.pa_tenancy_agreement = None
+                    new_allocation.pa_is_allocated = True
+                    # new_allocation.pa_final_rent = None
+                    new_allocation.save()
+
+                    # allocation.pa_property.pr_is_allocated = False
+                    # allocation.pa_property.save()
+
                 else:
                     prp = TblProperty.objects\
                         .get(pk=request.GET['property'])
@@ -1663,78 +1753,82 @@ def view_visit(request):
         print('Error at request', e)
         status = None
     if status == 'allocated':
-        months = TblVisit.objects.filter(vs_date__year=year,
-            vs_property__pr_is_allocated=True)\
+        months = TblVisit.objects\
+            .filter(vs_date__year=year,
+                    vs_property__pr_is_allocated=True)\
             .dates('vs_date', 'month', order='DESC')\
             .distinct('datefield').order_by('datefield')\
             .values('datefield')
         print(months)
         for d in months:
             print(d.get('datefield').strftime('%B, %Y'))
-        visits = TblVisit.objects.filter(vs_date__year=year,
-            vs_property__pr_is_allocated=True)\
+        visits = TblVisit.objects\
+            .filter(vs_date__year=year,
+                    vs_property__pr_is_allocated=True)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
             .annotate(
-            vs_address=Subquery(
-                TblProperty.objects.filter(
-                    pk=OuterRef('vs_property')
-                )
-                .select_related('pr_master__cln_master')
-                .values('pr_address',
-                        'pr_master__cln_master__msp_name',
-                        'pr_master__cln_master__msp_address')
-                .annotate(
-                    address=Concat(
-                        'pr_address',
-                        Value(', '),
-                        'pr_master__cln_master__msp_name',
-                        Value(', '),
-                        'pr_master__cln_master__msp_address'
+                vs_address=Subquery(
+                    TblProperty.objects.filter(
+                        pk=OuterRef('vs_property')
                     )
+                    .select_related('pr_master__cln_master')
+                    .values('pr_address',
+                            'pr_master__cln_master__msp_name',
+                            'pr_master__cln_master__msp_address')
+                    .annotate(
+                        address=Concat(
+                            'pr_address',
+                            Value(', '),
+                            'pr_master__cln_master__msp_name',
+                            Value(', '),
+                            'pr_master__cln_master__msp_address'
+                        )
+                    )
+                    .values('address'),
+                    output_field=CharField()
                 )
-                .values('address'),
-                output_field=CharField()
             )
-        )
         return render(request, 'agent/visit.html',
-                    {'visits': visits,
-                    'months': months})
+                      {'visits': visits,
+                       'months': months})
     elif status == 'unallocated':
-        months = TblVisit.objects.filter(vs_date__year=year,
-            vs_property__pr_is_allocated=False)\
+        months = TblVisit.objects\
+            .filter(vs_date__year=year,
+                    vs_property__pr_is_allocated=False)\
             .dates('vs_date', 'month', order='DESC')\
             .distinct('datefield').order_by('datefield')\
             .values('datefield')
         print(months)
         for d in months:
             print(d.get('datefield').strftime('%B, %Y'))
-        visits = TblVisit.objects.filter(vs_date__year=year,
-            vs_property__pr_is_allocated=False)\
+        visits = TblVisit.objects\
+            .filter(vs_date__year=year,
+                    vs_property__pr_is_allocated=False)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
             .annotate(
-            vs_address=Subquery(
-                TblProperty.objects.filter(
-                    pk=OuterRef('vs_property')
-                )
-                .select_related('pr_master__cln_master')
-                .values('pr_address',
-                        'pr_master__cln_master__msp_name',
-                        'pr_master__cln_master__msp_address')
-                .annotate(
-                    address=Concat(
-                        'pr_address',
-                        Value(', '),
-                        'pr_master__cln_master__msp_name',
-                        Value(', '),
-                        'pr_master__cln_master__msp_address'
+                vs_address=Subquery(
+                    TblProperty.objects.filter(
+                        pk=OuterRef('vs_property')
                     )
+                    .select_related('pr_master__cln_master')
+                    .values('pr_address',
+                            'pr_master__cln_master__msp_name',
+                            'pr_master__cln_master__msp_address')
+                    .annotate(
+                        address=Concat(
+                            'pr_address',
+                            Value(', '),
+                            'pr_master__cln_master__msp_name',
+                            Value(', '),
+                            'pr_master__cln_master__msp_address'
+                        )
+                    )
+                    .values('address'),
+                    output_field=CharField()
                 )
-                .values('address'),
-                output_field=CharField()
             )
-        )
         return render(request, 'agent/visit.html',
                       {'visits': visits,
                        'months': months})
@@ -1775,7 +1869,7 @@ def view_visit(request):
                       {'visits': visits,
                        'months': months})
     else:
-        
+
         months = TblVisit.objects.filter(vs_date__year=year)\
             .dates('vs_date', 'month', order='DESC')\
             .distinct('datefield').order_by('datefield')\
@@ -1812,7 +1906,7 @@ def view_visit(request):
         return render(request, 'agent/view_visit.html',
                       {'visits': visits,
                        'months': months,
-                       'year':year})
+                       'year': year})
 
 
 @for_staff
@@ -1827,8 +1921,28 @@ def add_rent_collected(request):
     last_paid = None
     if request.method == 'GET':
         if 'pid' in request.GET.keys():
-            propertyobj = TblPropertyAllocation.objects.select_related('pa_property').select_related(
-                'pa_tenant').get(pa_property=request.GET['pid'], pa_is_allocated=True)
+            propertyobj = TblPropertyAllocation.objects\
+                .select_related('pa_property')\
+                .select_related('pa_tenant')\
+                .get(pa_property=request.GET['pid'],
+                     pa_is_allocated=True)
+            print(propertyobj)
+            if propertyobj.pa_tenant.tn_status == 2:
+                prp = TblPropertyAllocation.objects\
+                .select_related('pa_property')\
+                .select_related('pa_tenant')\
+                .filter(pa_property=request.GET['pid'],
+                     pa_is_allocated=False,
+                     pa_tenant=propertyobj.pa_tenant)\
+                    .order_by('pk')[:1]
+                if prp.first() is not None:
+                    propertyobj = prp.first()
+                else:
+                    return render(request, 'agent/add_rent.html',
+                      {'propertyobj': propertyobj,
+                       'unpaidflag': False})
+
+                print(propertyobj)
 
         elif 'tid' in request.GET.keys():
             propertyobj = TblPropertyAllocation.objects.select_related('pa_property').select_related(
@@ -1881,14 +1995,19 @@ def add_rent_collected(request):
                     last_paid = datetime.strptime(m, "%B, %Y")
         print(result)
         if last_paid is not None:
-            last_paid = last_paid.strftime("%B, %Y") 
-        upflag=False
+            last_paid = last_paid.strftime("%B, %Y")
+        upflag = False
         for r in result:
             if "Unpaid" in r:
-                upflag=True
-        print("\n\nUnpaid Flag",upflag)
-        return render(request,'agent/add_rent.html',{'propertyobj':propertyobj,'rentdetails':rentdetails,'months':result, 'last_paid':last_paid, 'unpaidflag':upflag})
-    
+                upflag = True
+        print("\n\nUnpaid Flag", upflag)
+        return render(request, 'agent/add_rent.html',
+                      {'propertyobj': propertyobj,
+                       'rentdetails': rentdetails,
+                       'months': result,
+                       'last_paid': last_paid,
+                       'unpaidflag': upflag})
+
     elif request.method == 'POST':
         for k in request.POST.keys():
             print(k, "\t", request.POST[k])
@@ -1919,84 +2038,85 @@ def check_allocation(request):
         
 
 
-
 @for_staff
 def getAllocatedtenants(request):
-    response=""
+    response = ""
     if 'tenantid' in request.GET.keys():
-        tenant=TblTenant.objects.get(id=request.GET['tenantid'])
-        allocatedproperty=TblPropertyAllocation.objects\
-            .filter(pa_tenant=tenant,pa_is_allocated=True)\
+        tenant = TblTenant.objects.get(id=request.GET['tenantid'])
+        allocatedproperty = TblPropertyAllocation.objects\
+            .filter(pa_tenant=tenant, pa_is_allocated=True)\
             .select_related('pa_tenant')\
             .select_related('pa_property__pr_master__cln_master')
         print(allocatedproperty)
         for allocation in allocatedproperty:
-            response=allocation.pa_property.pr_address+" " \
-                    + allocation.pa_property.pr_master.cln_master.msp_name + " "\
-                    + allocation.pa_property.pr_master.cln_master.msp_address
+            response = allocation.pa_property.pr_address+" " \
+                + allocation.pa_property.pr_master.cln_master.msp_name + " "\
+                + allocation.pa_property.pr_master.cln_master.msp_address
 
     else:
-        tenantlist=TblPropertyAllocation.objects\
+        tenantlist = TblPropertyAllocation.objects\
             .filter(pa_is_allocated=True).filter(~Q(pa_agreement_date=None))\
             .select_related('pa_tenant')\
             .select_related('pa_property__pr_master__cln_master')
         print(tenantlist)
 
-        response+="""<option value="" selected="selected">Select Tenant</option>"""
+        response += """<option value="" selected="selected">Select Tenant</option>"""
         for tenant in tenantlist:
-            response+="<option value=" + str(tenant.pa_tenant.id)\
-                +">" + tenant.pa_tenant.tn_name \
+            response += "<option value=" + str(tenant.pa_tenant.id)\
+                + ">" + tenant.pa_tenant.tn_name \
                 + "</option>"
-    return HttpResponse(response)   
+    return HttpResponse(response)
+
 
 @for_staff
 def viewallocationDetails(request):
     if 'pid' in request.GET.keys():
-        allocatedproperty=TblProperty.objects.get(id=request.GET['pid'],pr_is_allocated=True)
-        allocation=TblPropertyAllocation.objects\
-            .filter(pa_property=allocatedproperty,pa_is_allocated=True)\
+        allocatedproperty = TblProperty.objects.get(
+            id=request.GET['pid'], pr_is_allocated=True)
+        allocation = TblPropertyAllocation.objects\
+            .filter(pa_property=allocatedproperty, pa_is_allocated=True)\
             .select_related('pa_property__pr_master__cln_master')\
             .select_related('pa_tenant')
-        
+
         # print(allocation.values())
-        pr=[]
+        pr = []
         for a in allocation:
-            pr=a
-        rentdetails=TblRentCollection.objects.filter(rc_allocation=pr)
+            pr = a
+        rentdetails = TblRentCollection.objects.filter(rc_allocation=pr)
         # length = (len(rentdetails.values()))
-        print("\n\nRent Details:",rentdetails)
-       
-        i=pr.pa_agreement_date
+        print("\n\nRent Details:", rentdetails)
+
+        i = pr.pa_agreement_date
         # print("start",i)
         # print("end",propertyobj.pa_agreement_end_date)
-        months=[]
+        months = []
         delta = timedelta(days=30)
         while i < pr.pa_agreement_end_date:
             # print("i",i)
             months.append(i.strftime("%B, %Y"))
-            # print(i.strftime("%B")) 
-            i+=delta
-        result=[]
-        
+            # print(i.strftime("%B"))
+            i += delta
+        result = []
+
         recorded = False
         for m in months:
             if (len(rentdetails.values()) > 0):
-                rent=False
+                rent = False
                 for r in rentdetails:
                     if m == r.rc_month.strftime("%B, %Y"):
-                        rent=True
+                        rent = True
                         break
                 if rent:
-                    result.append([m,"Paid"])
+                    result.append([m, "Paid"])
                 else:
                     if not recorded:
                         recorded = True
-                    result.append([m,"Unpaid"])
+                    result.append([m, "Unpaid"])
             else:
-                result.append([m,"Unpaid"])
-        upflag=False
+                result.append([m, "Unpaid"])
+        upflag = False
         for r in result:
             if "Unpaid" in r:
-                upflag=True
-        print("\n\nUnpaid Flag",upflag)
-        return render(request,'agent/allocation_details.html',{'allocation':pr,'months':result,'unpaidflag':upflag})
+                upflag = True
+        print("\n\nUnpaid Flag", upflag)
+        return render(request, 'agent/allocation_details.html', {'allocation': pr, 'months': result, 'unpaidflag': upflag})
