@@ -74,7 +74,11 @@
                         <option value="3">Potential Tenant(More Intrested)</option>
                     </select><br/><br/>
 
-<button type="submit" class="btn btn-theme btn-rounded " >Add Visit</button>
+                    <button type="submit" class="btn btn-theme btn-rounded " >Add Visit</button>
+                    {% if not tenant%}
+                        <a data-toggle="tooltip" title="Add new tenant to system." href="{% url 'addTenant' %}">New tenant?</a>
+                    {% endif %}
+                    
                 </form>
             </div>
         </div>

@@ -1741,6 +1741,7 @@ def change_status(request):
 
 @for_staff
 def view_visit(request):
+    print(datetime.now().year)
     months = None
     visits = None
     if 'year' in request.GET.keys():
@@ -2036,7 +2037,6 @@ def check_allocation(request):
         else:
             return HttpResponse("0")
         
-
 
 @for_staff
 def getAllocatedtenants(request):
