@@ -417,7 +417,6 @@ $('.delete_clone').live('click', function () {
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
     $('#move_to').select2('destroy')
-    // $('.highcharts-credits').addClass('hidden')
   });
 
 $('.allocate_clone').live('click', function () {
