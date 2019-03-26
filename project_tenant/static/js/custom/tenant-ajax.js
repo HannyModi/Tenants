@@ -887,6 +887,7 @@ $('.allocation_details').live('click',function(){
 })
 
 
+
 $('.deactivate').live('click', function () {
     if(confirm("Are you sure you want to deactivate this Tenant ?")){
     var id = $(this).attr('data-id')
@@ -916,6 +917,7 @@ $('.activate').live('click', function () {
     })
 }
 });
+
 $('.renew_agreement').live('click',function(){
     $.get('/agent/tenant_status_change', { id: $(this).attr('data-id'), status: 2, update: true ,}, function (data) {
         if (data == '1') {
