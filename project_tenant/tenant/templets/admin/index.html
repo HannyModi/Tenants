@@ -1,4 +1,4 @@
-{% extends 'agent/Base.html' %}
+{% extends 'admin/Base.html' %}
 {% load staticfiles %}
 {% block titleblock %}
 Admin/Home
@@ -19,10 +19,10 @@ Admin/Home
     </div>
 </section>
 
-<section id="container">
+<section>
     <div class="container">
         <div class="row">
-            <div class="span10">
+            <div class="span12">
                 <div id="container"></div>
                     <script src="https://code.highcharts.com/highcharts.src.js"></script>
                         <script>
@@ -35,7 +35,7 @@ Admin/Home
                                 },
                                 xAxis: {
                                     categories: [
-                                        {% for entry in msp_list %}'{{ entry.msp_name }} Class'{% if not forloop.last %}, {% endif %}{% endfor %}
+                                        {% for entry in msp_list %}'{{ entry.msp_name }}, <br/> {{entry.msp_address}}'{% if not forloop.last %}, {% endif %}{% endfor %}
                                     ]
                                 },
                                 series: [{

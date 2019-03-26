@@ -50,8 +50,10 @@ Add Rent
                               <input type="file" accept="image/gif, image/jpeg, image/png" id="receiptpic" name="reciptpic" /><br/><br/>
                               <center><button type="submit" class="btn btn-rounded btn-theme" value="submit">Add Rent</center>
                           </form>
-                          {% else %}
+                          {% elif unpaidflag == False %}
                           <strong>All rent of this allocation is paid. <strong>  
+                          {% else %}
+                          <strong>Agreement Under Process. <strong>  
                         {% endif %}
                     {% endif %}
                 </div>
