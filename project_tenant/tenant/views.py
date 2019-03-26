@@ -764,7 +764,6 @@ def edit_property(request):
 def deallocate_clone(request):
     try:
         al = TblAgentAllocation.objects.get(id=request.GET.get('id'))
-        al.al_master.cln_is_allocated = False
         tenants = TblTenant.objects\
             .filter(
                 pk__in=TblPropertyAllocation.objects
@@ -773,6 +772,7 @@ def deallocate_clone(request):
                 .values('pa_tenant')
             )
         update_tenant(tenants, request.user)
+        al.al_master.cln_is_allocated = False
         al.al_master.save()
         al.delete()
         return HttpResponse("1")
@@ -781,7 +781,7 @@ def deallocate_clone(request):
         return HttpResponse("0")
 
 
-# Deallocating property
+# Deleting clone property
 @for_admin
 def delete_clone(request):
     try:
@@ -790,6 +790,18 @@ def delete_clone(request):
                  cln_is_master_clone=True)
         clone = TblMasterPropertyClone.objects\
             .get(id=request.GET.get('id'))
+        tenants = TblTenant.objects\
+            .filter(
+                pk__in=TblPropertyAllocation.objects
+                .filter(pa_property__pr_master=clone,
+                        pa_is_allocated=True)
+                .values('pa_tenant')
+            )
+        if master_clone.is_allocated:
+            update_tenant(tenants, TblAgentAllocation.objects.get(
+                al_master=master_clone).al_agent)
+        else:
+            update_tenant(tenants, request.user)
         TblProperty.objects.filter(pr_master=clone)\
             .update(pr_master=master_clone)
         clone.delete()
@@ -846,7 +858,12 @@ def allocate_clone(request):
                 al_agent=al_agent, al_master=al_master)
             print(obj[1])
             obj[0].save()
-            update_tenant()
+            tenant_list = TblTenant.objects.filter(
+                pk__in=TblPropertyAllocation.objects.filter(
+                    pa_property__pr_master=obj[0].al_master
+                ).values('pa_tenant')
+            )
+            update_tenant(tenant_list,al_agent)
             return HttpResponseRedirect(reverse(view_master_property))
         except Exception as e:
             print('Error ', e)
