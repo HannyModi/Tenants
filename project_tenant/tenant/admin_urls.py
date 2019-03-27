@@ -103,8 +103,12 @@ urlpatterns = [
     path('move_to_clone_list/', views.move_to_clone_list,
          name='admin_move_to_clone_list'),
 
-    # Showing Clone list of selected Master property 
+    # Showing Clone list of selected Master property
     # excluding the selected clone
     path('move_from_clone_list/', views.move_from_clone_list,
          name='admin_move_from_clone_list'),
+
+    # View all unmanaged tenants on admin side.
+    path('unmanaged_tenants', views.view_unmanaged_tenants,
+         name='admin_unmanaged_tenants'),
 ]

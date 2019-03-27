@@ -864,7 +864,7 @@ def allocate_clone(request):
                     pa_property__pr_master=obj[0].al_master
                 ).values('pa_tenant')
             )
-            update_tenant(tenant_list,al_agent)
+            update_tenant(tenant_list, al_agent)
             return HttpResponseRedirect(reverse(view_master_property))
         except Exception as e:
             print('Error ', e)
@@ -958,16 +958,34 @@ def manage_clones(request):
             .get(al_master__pk=clone).al_agent
         properties = request.POST.getlist('move_to[]')
         for pr in properties:
-            try:
-                from_agent = TblAgentAllocation.objects\
-                    .get(al_master=TblProperty.objects
-                         .get(pk=pr).pr_master)\
-                    .al_master
-                update_tenant(from_agent, to_agent)
-            except:
-                pass
-            TblProperty.objects.filter(id=pr)\
-                .update(pr_master=clone)
+            pr = TblProperty.objects.get(id=pr)
+            pr.pr_master = clone
+            pr.save()
+            if pr.is_allocated:
+                try:
+                    # code for from agent
+                        # from_agent = TblAgentAllocation.objects\
+                        #     .get(al_master=TblProperty.objects
+                        #         .get(pk=pr).pr_master)\
+                        #     .al_master
+                        # update_tenant(from_agent, to_agent)
+                    try:
+                        to_agent = TblAgentAllocation.objects\
+                            .get(al_master=pr.pr_master).al_agent
+                    except:
+                        to_agent = request.user
+
+                    if to_agent is None:
+                        to_agent = request.user
+                    tenant = TblTenant.objects.filter(
+                        pk=TblPropertyAllocation.objects.get(
+                            pa_property=pr,
+                            pa_is_allocated=True
+                        ).pa_tenant
+                    )
+                    update_tenant(tenant, to_agent)
+                except Exception as e:
+                    print('Error at manage clone:-', e)
 
     # else:
     lst = request.POST.getlist('move_to[]')
@@ -1042,6 +1060,25 @@ def move_from_clone_list(request):
     response += "</select><br />"
     return HttpResponse(response)
 
+
+# View to all unmanaged tenants
+def view_unmanaged_tenants(request):
+    tenantlist = TblTenant.objects.filter(tn_agent=request.user)\
+        .annotate(
+            tn_clone=Subquery(
+                TblPropertyAllocation.objects.filter(
+                    pa_tenant=OuterRef('pk'),
+                    pa_is_allocated=True
+                ).values('pa_property__pr_master__cln_alias')))\
+        .annotate(
+            tn_master_property=Subquery(
+                TblPropertyAllocation.objects.filter(
+                    pa_tenant=OuterRef('pk'),
+                    pa_is_allocated=True
+                ).values('pa_property__pr_master__cln_master__msp_name')))
+    return render(request, 'admin/view_tenant.html',
+                  {'tenantlist': tenantlist})
+
 #######################################################################################################################
 # Agent site views
 #######################################################################################################################
@@ -1049,37 +1086,36 @@ def move_from_clone_list(request):
 # agent index view
 @for_staff
 def agent_index(request):
-    neartoend_agreement=TblPropertyAllocation.objects\
+    neartoend_agreement = TblPropertyAllocation.objects\
         .select_related('pa_tenant')\
         .select_related('pa_property__pr_master__cln_master')\
-        .filter(pa_is_allocated=True,\
-            pa_agreement_end_date__lt=datetime.now()\
-            + timedelta(days=1300),\
-            pa_tenant__tn_agent=request.user)\
-                .order_by('pa_agreement_end_date')
+        .filter(pa_is_allocated=True,
+                pa_agreement_end_date__lt=datetime.now()
+                + timedelta(days=1300),
+                pa_tenant__tn_agent=request.user)\
+        .order_by('pa_agreement_end_date')
 
     # Monthwise_rentcollection=TblRentCollection.objects\
     #     .filter(rc_allocation__pa_tenant__tn_agent=request.user,rc_pay_off_date__year=datetime.now().year)\
     #     .values('rc_pay_off_date__month')\
     #     .annotate(total=Sum('rc_allocation__pa_final_rent'))\
-       
+
     # for m in Monthwise_rentcollection.values('rc_pay_off_date','total'):
     #     print(m)
 
     monthly_rent_collection = TblRentCollection.objects\
-        .filter(rc_pay_off_date__lt=datetime.now() \
-        + timedelta(days=365))\
+        .filter(rc_pay_off_date__lt=datetime.now()
+                + timedelta(days=365))\
         .annotate(month=TruncMonth('rc_pay_off_date'))\
         .values('month')\
         .annotate(sum=Sum('rc_allocation__pa_final_rent'))\
         .values('month', 'sum')
     # print(rent_collection.values('month','sum'))
 
-
     rent_collection = TblTenant.objects\
         .filter(tn_agent=request.user)\
         .annotate(total=Sum('tblpropertyallocation__tblrentcollection__rc_allocation__pa_final_rent'
-           ))
+                            ))
     # tenantname=[]
     # totalammount=[]
     # for t in rent_collection:
@@ -1087,13 +1123,12 @@ def agent_index(request):
     #     totalammount.append(t.total)
     # print(tenantname,totalammount)
 
-    
     # print(rentcollection.values("total"))
     # for tenant in rentcollection:
     #     print(tenant.pa_tenant,tenant.total )
     # # * tenant.rc_allocation.pa_final_rent)
 
-    return render(request, 'agent/index.html',{'neartoend_agreement':neartoend_agreement,'tenantname':rent_collection,'monthly_rent':monthly_rent_collection})
+    return render(request, 'agent/index.html', {'neartoend_agreement': neartoend_agreement, 'tenantname': rent_collection, 'monthly_rent': monthly_rent_collection})
 
 # view all  tenants of agent
 @for_staff
@@ -2054,24 +2089,24 @@ def add_rent_collected(request):
                      pa_is_allocated=True)
             print(propertyobj)
             alloc_count = TblPropertyAllocation.objects\
-                .filter(pa_property=propertyobj.pa_property,\
-                pa_tenant=propertyobj.pa_tenant).count()
-            print("\n\n\n\n",alloc_count) 
-            if alloc_count > 1:   
+                .filter(pa_property=propertyobj.pa_property,
+                        pa_tenant=propertyobj.pa_tenant).count()
+            print("\n\n\n\n", alloc_count)
+            if alloc_count > 1:
                 if propertyobj.pa_tenant.tn_status == 2:
                     prp = TblPropertyAllocation.objects\
-                    .select_related('pa_property')\
-                    .select_related('pa_tenant')\
-                    .filter(pa_property=request.GET['pid'],
-                        pa_is_allocated=False,
-                        pa_tenant=propertyobj.pa_tenant)\
+                        .select_related('pa_property')\
+                        .select_related('pa_tenant')\
+                        .filter(pa_property=request.GET['pid'],
+                                pa_is_allocated=False,
+                                pa_tenant=propertyobj.pa_tenant)\
                         .order_by('pk')[:1]
                     if prp.first() is not None:
                         propertyobj = prp.first()
                     else:
                         return render(request, 'agent/add_rent.html',
-                        {'propertyobj': propertyobj,
-                        'unpaidflag': False})
+                                      {'propertyobj': propertyobj,
+                                       'unpaidflag': False})
 
                     print(propertyobj)
 
@@ -2091,8 +2126,8 @@ def add_rent_collected(request):
             result = []
             upflag = "Agreement Under Process"
         else:
-        # print("start",i)
-        # print("end",propertyobj.pa_agreement_end_date)
+            # print("start",i)
+            # print("end",propertyobj.pa_agreement_end_date)
             months = []
             delta = timedelta(days=30)
             while i < propertyobj.pa_agreement_end_date:
@@ -2202,7 +2237,7 @@ def getAllocatedtenants(request):
             .filter(pa_is_allocated=True).filter(~Q(pa_agreement_date=None))\
             .select_related('pa_tenant')\
             .select_related('pa_property__pr_master__cln_master')\
-        
+
         print(tenantlist)
 
         response += """<option value="" selected="selected">

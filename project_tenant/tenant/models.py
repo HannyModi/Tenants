@@ -87,7 +87,7 @@ class TblTenant(models.Model):
 
     class Meta:
         verbose_name_plural = 'Tenant Datails'
-        unique_together = (('tn_contact','tn_agent'))
+        unique_together = (('tn_contact', 'tn_agent'))
 
     def __str__(self):
         return self.tn_name
@@ -105,7 +105,7 @@ class TblMasterProperty(models.Model):
     # msp_is_allocated = models.BooleanField(default=False)
     msp_is_active = models.BooleanField(default=True)
 
-    #A function to Create new Save
+    # A function to Create new Save
     def new_save(self, *args, **kwargs):
         clone = TblMasterPropertyClone.objects.create(
             cln_alias=self.msp_name+" master clone",
@@ -113,6 +113,7 @@ class TblMasterProperty(models.Model):
             cln_is_master_clone=True)
         clone.save()
         super(TblMasterProperty, self).save(*args, **kwargs)
+
     class Meta:
         verbose_name_plural = 'Master Properties'
 
@@ -133,7 +134,6 @@ class TblMasterPropertyClone(models.Model):
     cln_is_active = models.BooleanField(default=True)
 
 
-
 # Property Table
 class TblProperty(models.Model):
     # Master property Clone reference
@@ -145,8 +145,8 @@ class TblProperty(models.Model):
     pr_rent = models.DecimalField(decimal_places=2, max_digits=10)
     # Fixed safety deposite for property
     pr_deposite = models.DecimalField(decimal_places=2, max_digits=10)
-    #Description for Property
-    pr_description = models.CharField(max_length=255,null=True)
+    # Description for Property
+    pr_description = models.CharField(max_length=255, null=True)
     # allocation status of property
     pr_is_allocated = models.BooleanField(default=False)
     pr_is_active = models.BooleanField(default=True)
@@ -177,9 +177,6 @@ class TblProperty(models.Model):
 #         managed = False
 #         verbose_name = 'Master Property '
 #         verbose_name_plural = 'Master Properties'
-
-
-        
 
 
 # Visit Table
@@ -219,7 +216,6 @@ class TblAgentAllocation(models.Model):
         return self.al_agent.username
 
 
-
 # Property Allocation Table
 # @deconstructible
 class TblPropertyAllocation(models.Model):
@@ -240,7 +236,7 @@ class TblPropertyAllocation(models.Model):
     pa_tenancy_agreement = models.ImageField(
         upload_to='rent/tenancy/agreement')
     # Final rent after bargaining
-    pa_final_rent = models.FloatField(max_length=10,null=True)
+    pa_final_rent = models.FloatField(max_length=10, null=True)
     # showing the current allocation status.
     # true for alloted ,false for previous allocation
     pa_is_allocated = models.BooleanField(default=False)
@@ -256,7 +252,7 @@ class TblPropertyAllocation(models.Model):
 class TblRentCollection(models.Model):
     # Property reference
     rc_allocation = models.ForeignKey(TblPropertyAllocation,
-                                    on_delete=models.CASCADE)
+                                      on_delete=models.CASCADE)
     # identification number on physical copy
     rc_recipt_no = models.IntegerField()
     # year for rent is collected
@@ -265,13 +261,15 @@ class TblRentCollection(models.Model):
     rc_month = models.DateField(null=False)
     # date when the rent is collected
     rc_pay_off_date = models.DateField(null=False)
+    # Reference of agent who have collected the rent
+    rc_agent = models.ForeignKey(TblAgent,
+                                 on_delete=models.DO_NOTHING)
 
     class Meta:
         verbose_name_plural = 'Rent Collection Details'
 
     def __str__(self):
         return str(self.rc_allocation.id)
-
 
 
 # You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
@@ -299,8 +297,6 @@ class TblRentCollection(models.Model):
 # pr_rent     20.00
 # pr_deposite     200.0
 # pr__description     tyjr
-
-
 
     # if request.method == "POST":
     #     lst = request.POST
