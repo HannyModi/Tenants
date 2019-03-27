@@ -55,7 +55,7 @@ def index(request):
         if request.user.is_authenticated:
             print('\n\nlogout\n\n')
             logout(request)
-    return render(request, 'base.html')
+    return render(request, 'Base.html')
 
 
 # Requesting agent registration
@@ -94,10 +94,10 @@ def do_login(request):
             return HttpResponseRedirect(reverse(agent_index))
         else:
             # print("\n\n\n\nInavlid user\n\n\n\n")
-            return render(request, 'base.html')
+            return render(request, 'Base.html')
     else:
         # print("\n\n\n\nInavlid user\n\n\n\n")
-        return render(request, 'base.html')
+        return render(request, 'Base.html')
 
 
 #######################################################################################################################

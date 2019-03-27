@@ -8,7 +8,7 @@ def for_admin(function):
         if request.user.is_authenticated and request.user.is_superuser:
            return function(request, *args, **kwargs)
         else:
-            return render(request,'base.html') 
+            return render(request,'Base.html') 
     return wrap
 
 def for_staff(function):
@@ -16,5 +16,5 @@ def for_staff(function):
         if request.user.is_authenticated and request.user.is_staff:
            return function(request, *args, **kwargs)
         else:
-            return render(request,'base.html') 
+            return render(request,'Base.html') 
     return wrap
