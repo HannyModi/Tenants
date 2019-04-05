@@ -1,0 +1,11 @@
+.Python
+.vscode
+*.pyc
+/env_tenant/
+/project_tenant/project_tenant/settings.py
+.DS_Store
+project_tenant/project_tenant/__pycache__/
+project_tenant/tenant/migrations/
+requirements.txt
+runtime.txt
+project_tenant/media/
