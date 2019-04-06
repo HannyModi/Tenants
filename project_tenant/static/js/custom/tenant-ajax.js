@@ -1,27 +1,31 @@
 $('.accept_agent_request').live('click', function () {
-    $.get('/admin/agent_request_accept/', { id: $(this).attr('data-id') }, function (data) {
-        if (data == '1') {
-            status = "Agent Request Accepted.";
-            localStorage.setItem("Status", status);
-            location.reload();
-        }
-        else {
-            $.notify('Something went wrong while Accepting agent request.', 'error')
-        }
-    })
+    if (confirm('Are You sure you want to activate this Agent?')) {
+        $.get('/admin/agent_request_accept/', { id: $(this).attr('data-id') }, function (data) {
+            if (data == '1') {
+                status = "Agent Request Accepted.";
+                localStorage.setItem("Status", status);
+                location.reload();
+            }
+            else {
+                $.notify('Something went wrong while Accepting agent request.', 'error')
+            }
+        })
+    }
 });
 
 $('.reject_agent_request').live('click', function () {
-    $.get('/admin/agent_request_reject/', { id: $(this).attr('data-id') }, function (data) {
-        if (data == '1') {
-            status = "Agent Request Rejected.";
-            localStorage.setItem("Status", status);
-            location.reload();
-        }
-        else {
-            $.notify('Something went wrong while deleting agent request.', 'error')
-        }
-    })
+    if (confirm('Are You sure you want to Reject this Agent?\n You won\'t be able to revert the change.')) {
+        $.get('/admin/agent_request_reject/', { id: $(this).attr('data-id') }, function (data) {
+            if (data == '1') {
+                status = "Agent Request Rejected.";
+                localStorage.setItem("Status", status);
+                location.reload();
+            }
+            else {
+                $.notify('Something went wrong while deleting agent request.', 'error')
+            }
+        })
+    }
 });
 
 
@@ -42,12 +46,13 @@ $('.agent-act').live("click", function () {
     if (window.confirm(msg)) {
         $.get('/admin/agent_action/', { id: ag_id, is_active: act }, function (data) {
             if (view == 'view') {
-                location.href = '/admin/agent_requests/agent_profile/?id=' + ag_id;
+                location.href = '/admin/' + ag_id + '/agent_requests/agent_profile/';
             }
 
         });
         if (view != 'view') {
             if (act == "0") {
+                $.notify("Agent Retired Successfully.", "success")
                 $("#td" + ag_id).html("Retired")
                 $(this).attr("data-act", "1");
                 $(this).val("Activate");
@@ -55,6 +60,7 @@ $('.agent-act').live("click", function () {
                 $(this).parent().siblings('.allocation').html('');
             }
             else {
+                $.notify("Agent Activated Successfully.", "success")
                 $("#td" + ag_id).html("Active")
                 $(this).attr("data-act", "0");
                 $(this).val("Retire");
@@ -312,14 +318,33 @@ $("#msp_list").change(function () {
 });
 
 
-
+$(".pr_address").live('keyup', function (e) {
+    console.log(e.keyCode)
+    if (e.keyCode === 13 && e.shiftKey) {
+        var num = $("#num").val();
+        // var new_html = '<input type="text" required name="pr_address'+num+'"/><a class="icon-minus-sign remove_address" ></a>';
+        var new_html = '<div class="input-append" style="display:flex;" >' +
+            '<input class="span2 pr_address" id="appendedInputButton" name="pr_address' +
+            num + '" type="text"><button class="btn btn-theme remove_address"' +
+            'id="add_address" type="button"><i class="icon-minus"></i></button></div>'
+        var new_num = Number(num) + 1;
+        $("#num").val(new_num);
+        $("#addresses").append(new_html);
+        $("#addresses").find('input').last().focus();
+    }
+    else if (e.keyCode === 8 && e.shiftKey && $('.pr_address').length > 1) {
+        $(this).parent().prev().children('.pr_address').focus();
+        $(this).parent().remove();
+        $(this).remove();
+    }
+});
 
 // Showing more textboxes when user clicks plus button
 $("#add_address").click(function () {
     var num = $("#num").val();
     // var new_html = '<input type="text" required name="pr_address'+num+'"/><a class="icon-minus-sign remove_address" ></a>';
     var new_html = '<div class="input-append" style="display:flex;" >' +
-        '<input class="span2" id="appendedInputButton" name="pr_address' +
+        '<input class="span2 pr_address" id="appendedInputButton" name="pr_address' +
         num + '" type="text"><button class="btn btn-theme remove_address"' +
         'id="add_address" type="button"><i class="icon-minus"></i></button></div>'
     var new_num = Number(num) + 1;
@@ -417,38 +442,38 @@ $('.close,#close,#close1').click(function () {
 });
 
 $('.deallocate_clone').live('click', function () {
-    if(confirm("Are You sure You want to deallocate this clone?")){
-    $.get('/admin/deallocate_clone/', { id: $(this).attr('data-id') }, function (data) {
-        if (data == '1') {
-            status = 'Property deallocated ';
-            localStorage.setItem("Status", status);
-            location.reload('/admin/view_master_property/');
-        }
-        else {
-            $.notify('Error accured while deallocating Property.', 'error')
-        }
-    })
-}
+    if (confirm("Are You sure You want to deallocate this clone?")) {
+        $.get('/admin/deallocate_clone/', { id: $(this).attr('data-id') }, function (data) {
+            if (data == '1') {
+                status = 'Property deallocated ';
+                localStorage.setItem("Status", status);
+                location.reload('/admin/view_master_property/');
+            }
+            else {
+                $.notify('Error accured while deallocating Property.', 'error')
+            }
+        })
+    }
 });
 $('.delete_clone').live('click', function () {
-    if(confirm("Are You sure You want to delete this clone?\nAll properties from this clone will be transfered to master clone.")){
-    $.get('/admin/delete_clone/', { id: $(this).attr('data-cln'), msp: $(this).attr('data-msp') }, function (data) {
-        if (data == '1') {
-            status = 'Clone deleted';
-            localStorage.setItem("Status", status);
-            location.reload('/admin/view_master_property/');
-        }
-        else {
-            $.notify('Error accured while deleting Clone.', 'error')
-        }
-    })
-}
+    if (confirm("Are You sure You want to delete this clone?\nAll properties from this clone will be transfered to master clone.")) {
+        $.get('/admin/delete_clone/', { id: $(this).attr('data-cln'), msp: $(this).attr('data-msp') }, function (data) {
+            if (data == '1') {
+                status = 'Clone deleted';
+                localStorage.setItem("Status", status);
+                location.reload('/admin/view_master_property/');
+            }
+            else {
+                $.notify('Error accured while deleting Clone.', 'error')
+            }
+        })
+    }
 });
 
-$(document).ready(function(){
+$(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
     $('#move_to').select2('destroy')
-  });
+});
 
 $('.allocate_clone').live('click', function () {
     var msp = $(this).attr('data-msp');
@@ -464,7 +489,7 @@ $('.delete_master').live('click', function () {
                 // location.reload('/admin/view_master_property/');
                 $this.parent().parent().next().remove();
                 $this.parent().parent().remove();
-                $.notify('Property Sold and Removed from system ','success');
+                $.notify('Property Sold and Removed from system ', 'success');
             }
             else {
                 $.notify('Error accured while Deleting Property.')
@@ -500,14 +525,20 @@ $('.pimg').live('click', function () {
 $(document).ready(function () {
     //get it if Status key found
     var str;
+    var code;
     if (localStorage.getItem("Status")) {
         str = localStorage.getItem("Status")
-        $.notify(str, "success");
+        code = localStorage.getItem('code')
+        if (code == null) {
+            code = 'success'
+        }
+        $.notify(str, code);
+        // localStorage.setItem('code','success');
         localStorage.clear();
     }
 });
 
-$(".allocate_tenant").live('click',function () {
+$(".allocate_tenant").live('click', function () {
     if ($(this).attr('data-pid')) {
         pid = $(this).attr('data-pid');
         location.href = '/agent/get_Tenant_list/?pid=' + pid + '&page=' + 'pdetails';
@@ -518,10 +549,10 @@ $(".allocate_tenant").live('click',function () {
     }
 });
 
-$('.deallocate_tenant').live('click',function () {
-    if (confirm("Are you sure you want to deallocate Property?")){
+$('.deallocate_tenant').live('click', function () {
+    if (confirm("Are you sure you want to deallocate Property?")) {
         if ($(this).attr('data-tid')) {
-            
+
             tid = $(this).attr('data-tid');
             $.get('/agent/deallocate_property/', { tenant: tid }, function (data) {
                 if (data == "1") {
@@ -551,7 +582,7 @@ $('.deallocate_tenant').live('click',function () {
 
             });
         }
-}
+    }
 });
 
 
@@ -663,7 +694,7 @@ $('#save_tenant_status').live('click', function () {
         }
         else if (current_status == 3 && ($('#tenant_visit').hasClass('hidden') || $('#tenant_visit').parent().hasClass('hidden'))) {
             console.log('now i ll create new allocation for this tenant on same allocated property')
-            $.get('/agent/tenant_status_change', { id: id, status: status, update: true ,}, function (data) {
+            $.get('/agent/tenant_status_change', { id: id, status: status, update: true, }, function (data) {
                 if (data == '1') {
                     status = "Agreement renew process recorded.";
                     localStorage.setItem("Status", status);
@@ -683,7 +714,7 @@ $('#save_tenant_status').live('click', function () {
                 $.get('/agent/tenant_status_change', {
                     id: id, status: status,
                     update: false, property: $('#tenant_visit').val(),
-                    rent:$('#rent').val()
+                    rent: $('#rent').val()
                 },
                     function (data) {
                         if (data == '1') {
@@ -703,7 +734,7 @@ $('#save_tenant_status').live('click', function () {
             $.notify("Status of tenant is not changed.", "info")
         }
     }
-    else if (status==3) {
+    else if (status == 3) {
         location.href = '/agent/get_Tenant_list/?tid=' + id + '&page=' + 'tdetails';
     }
 });
@@ -822,21 +853,21 @@ $('#selected_tenant').live('change', function () {
 
 
 // Searching in Agent request on search textbox
-$('.search_tenant').live('keyup',function () {
-    var status=$(this).attr('data-status'); 
+$('.search_tenant').live('keyup', function () {
+    var status = $(this).attr('data-status');
     var query;
     query = $(this).val();
-    $.get('/agent/tenant_search_list/', { suggestion: query,status: status }, function (data) {
-       if(status == "all"){
-            $('#tbl_tenants').html(data);   
+    $.get('/agent/tenant_search_list/', { suggestion: query, status: status }, function (data) {
+        if (status == "all") {
+            $('#tbl_tenants').html(data);
         }
         if (status == "active") {
-            $('#tbl_active_tenants').html(data);   
-        } 
-        if (status == "inactive") {
-            $('#tbl_inactive_tenants').html(data);   
+            $('#tbl_active_tenants').html(data);
         }
-           
+        if (status == "inactive") {
+            $('#tbl_inactive_tenants').html(data);
+        }
+
     });
 });
 
@@ -853,104 +884,101 @@ $('.propertyradio').live('click', function () {
 $('.add_rent').live('click', function () {
     var pid = $(this).attr('data-pid');
     var tid = $(this).attr('data-tid');
-    if(pid){
-    $.get('/agent/check_allocation/', { pid: pid },function(data)
-    {
-        if (data == "1"){
-            location.href = '/agent/add_rent/?pid='+pid;
-        }
-        else{
-            alert("This Property's Agreement is under Process.");
-        }
-    });
-   
+    if (pid) {
+        $.get('/agent/check_allocation/', { pid: pid }, function (data) {
+            if (data == "1") {
+                location.href = '/agent/add_rent/?pid=' + pid;
+            }
+            else {
+                alert("This Property's Agreement is under Process.");
+            }
+        });
+
     };
-    if(tid){
-    // $.get('/Agent/add_rent/', { tid: tid });
-    location.href = '/agent/add_rent/?tid='+tid;
+    if (tid) {
+        // $.get('/Agent/add_rent/', { tid: tid });
+        location.href = '/agent/add_rent/?tid=' + tid;
 
     };
 })
 
 $('.view_visit').live('click', function () {
-    $.get('/agent/view_visits/', { status: $(this).attr('data-req'),year: $('#visit_year').val() },function(data)
-    {
+    $.get('/agent/view_visits/', { status: $(this).attr('data-req'), year: $('#visit_year').val() }, function (data) {
         $('#visitlist').html(data)
     });
-   
+
 })
 
 $("#visit_year").change(function () {
-    location.href = '/agent/view_visits/?year='+$(this).val();
+    location.href = '/agent/view_visits/?year=' + $(this).val();
 });
 
-function addrentclick(){
+function addrentclick() {
     // alert("Hello")
-    $.get('/agent/getAllocatedtenants/',{},function(data){
-    // alert(data)
-    console.log(data);
-    $('#tenantid').html(data)
-    $('#tenantid').select2()
-    $('#mymodalforaddrent').css('display', 'block');
+    $.get('/agent/getAllocatedtenants/', {}, function (data) {
+        // alert(data)
+        console.log(data);
+        $('#tenantid').html(data)
+        $('#tenantid').select2()
+        $('#mymodalforaddrent').css('display', 'block');
     })
-    };
+};
 
-$('#tenantid').live('change',function(){
+$('#tenantid').live('change', function () {
     // alert($('#tenantid').val())
-    $.get('/agent/getAllocatedtenants/',{tenantid:$('#tenantid').val()},function(data)
-    {
+    $.get('/agent/getAllocatedtenants/', { tenantid: $('#tenantid').val() }, function (data) {
         console.log(data);
         $('#allocated_property_name').val(data)
         $('#allocated_property_name').removeClass('hidden')
     })
 })
 
-$('#addrent').live('click',function(){
+$('#addrent').live('click', function () {
     $('#allocated_property_name').addClass('hidden')
     $('#mymodalforaddrent').css('display', 'none');
-    tid=$('#tenantid').val()
-    location.href = '/agent/add_rent/?tid='+tid;
+    tid = $('#tenantid').val()
+    location.href = '/agent/add_rent/?tid=' + tid;
 })
 
-$('.allocation_details').live('click',function(){
-    pid=$(this).attr('data-pid');
-    location.href='/agent/viewallocationDetails/?pid='+pid;
+$('.allocation_details').live('click', function () {
+    pid = $(this).attr('data-pid');
+    location.href = '/agent/viewallocationDetails/?pid=' + pid;
 })
 
 
 
 $('.deactivate').live('click', function () {
-    if(confirm("Are you sure you want to deactivate this Tenant ?")){
-    var id = $(this).attr('data-id')
-    $.get('/agent/activation_change_tenant/', { id: id, change: 'deactivate' }, function (data) {
-        if (data == "1") {
-            status = "Tenant Dectivated";
-            localStorage.setItem("Status", status);
-            location.reload('/agent/ViewTenants/');
-        }
-        else
-            $.notify('Error occured during deactivation', 'error');
-    })
-}
+    if (confirm("Are you sure you want to deactivate this Tenant ?")) {
+        var id = $(this).attr('data-id')
+        $.get('/agent/activation_change_tenant/', { id: id, change: 'deactivate' }, function (data) {
+            if (data == "1") {
+                status = "Tenant Dectivated";
+                localStorage.setItem("Status", status);
+                location.reload('/agent/ViewTenants/');
+            }
+            else
+                $.notify('Error occured during deactivation', 'error');
+        })
+    }
 })
 
 $('.activate').live('click', function () {
-    if(confirm("Are you sure you want to activate this Tenant Again?")){
-    var id = $(this).attr('data-id')
-    $.get('/agent/activation_change_tenant/', { id: id, change: 'activate' }, function (data) {
-        if (data == '1') {
-            status = "Tenant Activated";
-            localStorage.setItem("Status", status);
-            location.reload('/agent/ViewTenants/');
-        }
-        else
-            $.notify('Error occured during deactivation', 'error');
-    })
-}
+    if (confirm("Are you sure you want to activate this Tenant Again?")) {
+        var id = $(this).attr('data-id')
+        $.get('/agent/activation_change_tenant/', { id: id, change: 'activate' }, function (data) {
+            if (data == '1') {
+                status = "Tenant Activated";
+                localStorage.setItem("Status", status);
+                location.reload('/agent/ViewTenants/');
+            }
+            else
+                $.notify('Error occured during deactivation', 'error');
+        })
+    }
 });
 
-$('.renew_agreement').live('click',function(){
-    $.get('/agent/tenant_status_change', { id: $(this).attr('data-id'), status: 2, update: true ,}, function (data) {
+$('.renew_agreement').live('click', function () {
+    $.get('/agent/tenant_status_change', { id: $(this).attr('data-id'), status: 2, update: true, }, function (data) {
         if (data == '1') {
             status = "Agreement renew process recorded.";
             localStorage.setItem("Status", status);
@@ -965,19 +993,17 @@ $('.renew_agreement').live('click',function(){
 });
 
 
-$('#allocate_unmanaged_tenant').live('click',function(){
-    if($('#selectedagent').val()=="")
-    {
+$('#allocate_unmanaged_tenant').live('click', function () {
+    if ($('#selectedagent').val() == "") {
         alert('Please select the agent first.')
     }
-    else{
-        if(confirm('Are you sure to allocate these tenents to selected agent?\nYou will not be able to undo this allocation.'))
-        {
-            var selected= new Array();
-            $('.unmanaged_tenant:checked').each(function(){
-                    selected.push($(this).val())
-                });
-            $.get('/admin/allocate_unamanaged_tenant', { tenants: selected.toString(),agent:$('#selectedagent').val()}, function (data) {
+    else {
+        if (confirm('Are you sure to allocate these tenents to selected agent?\nYou will not be able to undo this allocation.')) {
+            var selected = new Array();
+            $('.unmanaged_tenant:checked').each(function () {
+                selected.push($(this).val())
+            });
+            $.get('/admin/allocate_unamanaged_tenant', { tenants: selected.toString(), agent: $('#selectedagent').val() }, function (data) {
                 if (data == '1') {
                     status = "Selected tenants are allocated";
                     localStorage.setItem("Status", status);
@@ -987,16 +1013,16 @@ $('#allocate_unmanaged_tenant').live('click',function(){
                 else {
                     $.notify("Something went wrong while allocating agents", "error")
                 }
-            }); 
+            });
         }
-        
-   
+
+
     }
-   
+
 });
 
-$('#id_ag_contact').live('keyup',function () {
-    $(this).attr('maxlength','10');
+$('#id_ag_contact').live('keyup', function () {
+    $(this).attr('maxlength', '10');
     var $this = $(this);
 
     // Get the value.

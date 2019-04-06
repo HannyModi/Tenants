@@ -104,6 +104,16 @@ def do_login(request):
 # Common in admin and agent
 #######################################################################################################################
 
+
+def notify(msg=str, code="success", url=str):
+    response = "<script>\
+                    console.log('notification');\
+                    localStorage.setItem('Status', '"+msg+"');\
+                    localStorage.setItem('code','"+code+"');\
+                    location.href = '"+url +\
+        "';</script>"
+    return HttpResponse(response)
+
 # adding tenant by agent
 # @login_required
 # def add_tenant(request):
@@ -192,8 +202,8 @@ def admin_index(request):
     allinfo['total_tenants'] = TblTenant.objects.filter(
         ~Q(tn_status=0), tn_is_active=True).count()
     allinfo['free_agents'] = TblAgent.objects.exclude(
-        Q(id__in=TblAgentAllocation.objects.all()\
-        .values_list('al_agent', flat=True))
+        Q(id__in=TblAgentAllocation.objects.all()
+          .values_list('al_agent', flat=True))
         | Q(is_superuser=True) | Q(is_active=False)).count()
     # allinfo['agent_requests']=TblAgent.objects.
     print(allinfo)
@@ -355,7 +365,10 @@ def update_tenant(tenant_list, to_agent):
 def agent_action(request):
     agent = TblAgent.objects.get(id=request.GET['id'])
     act = request.GET['is_active']
+    msg = 'Agent Activated Successfully.'
+    code = 'success'
     if act == '0':
+        msg = 'Agent Retired Successfully.'
         print('dealloacting all properties')
         try:
             allocation = TblAgentAllocation.objects\
@@ -373,10 +386,12 @@ def agent_action(request):
 
         except Exception as e:
             print('Error at deallocation', e)
+            msg = 'Something went wrong while retiring Agent.'
+            code = 'error'
 
     agent.is_active = act
     agent.save()
-    return HttpResponseRedirect(reverse(view_agent_all))
+    return notify(msg=msg, code=code, url=reverse(view_agent_all))
 
 
 # returning search result of Active Agents.
@@ -433,9 +448,9 @@ def agent_active_search(request):
 # Page Agent profile View.......................................................................................
 # Viewing the agent request in more detailed View
 @for_admin
-def agent_profile(request ,tid):
+def agent_profile(request, tid):
     print("\n\n\n\n\n\n")
-    
+
     agent = TblAgent.objects.get(id=tid)
 
     details = TblAgentAllocation.objects\
@@ -493,7 +508,9 @@ def show_data_agent(request):
             data = TblPropertyAllocation.objects\
                 .select_related('pa_tenant')\
                 .select_related('pa_property')\
-                .filter(pa_property__pr_master=id)\
+                .filter(pa_property__pr_master=id,
+                        pa_property__pr_is_allocated=True,
+                        pa_is_allocated=True)\
                 .order_by('pa_property__pr_address')
             for d in data:
                 print(d.pa_property.pr_master.cln_alias,
@@ -565,12 +582,12 @@ def add_master_property(request):
                                         POST['msp_clone'+str(n)],
                                         cln_master=msp[0])
                             cln.save()
-                return HttpResponseRedirect(
-                    reverse(view_master_property))
+                return notify(msg='Master Property Added Successfully',
+                              url=reverse(view_master_property))
             else:
-                return render(request,
-                              'admin/add_master_property.html',
-                              {'context': 'Master Property already exists'})
+                return notify(msg='Master Property Already exists.',
+                              code='error',
+                              url=reverse(add_master_property))
 
         except Exception as e:
             print("Error :", e)
@@ -872,7 +889,7 @@ def delete_clone(request):
                         pa_is_allocated=True)
                 .values('pa_tenant')
             )
-        if master_clone.is_allocated:
+        if master_clone.cln_is_allocated:
             update_tenant(tenants, TblAgentAllocation.objects.get(
                 al_master=master_clone).al_agent)
         else:
@@ -941,10 +958,15 @@ def allocate_clone(request):
                 ).values('pa_tenant')
             )
             update_tenant(tenant_list, al_agent)
-            return HttpResponseRedirect(reverse(view_master_property))
+            # return render(request,'notify.html',{'msg':'notification testing','code':'success','url':reverse(view_master_property)})
+            return notify(msg='Property Allocated Successfully',
+                          url=reverse(view_master_property))
+            # return HttpResponseRedirect(reverse(view_master_property))
         except Exception as e:
             print('Error ', e)
-            return HttpResponseRedirect(reverse(view_master_property))
+            return notify(msg='Something went wrong while allocating agent.',
+                          code='error',
+                          url=reverse(view_master_property))
 
 
 # Deleting Master property
@@ -1784,10 +1806,11 @@ def allocate_property(request):
                 print("\n\nError: ", e)
 
         if p == "pdetails":
-            return HttpResponseRedirect(
-                reverse(allocated_property_list))
+            return notify(msg='Property Allocated Successfully',
+                          url=reverse(allocated_property_list))
         if p == "tdetails":
-            return HttpResponseRedirect(reverse(view_tenants))
+            return notify(msg='Property Allocated Successfully',
+                          url=reverse(view_tenants))
     return get_Tenant_list(request)
 
 
@@ -1875,11 +1898,13 @@ def get_tenant_visit(request):
 @for_staff
 def change_tenant_status(request):
     tenant = TblTenant.objects.get(id=request.POST['tid'])
-
+    msg = ''
+    code = 'success'
     try:
         if tenant.tn_is_active == False:
             tenant.tn_is_active = True
             tenant.save()
+            msg = 'Tenant Activated Successfully.'
         else:
             tenant.tn_is_active = False
             tenant.tn_status = 0
@@ -1890,9 +1915,12 @@ def change_tenant_status(request):
             pAllocation.pa_property.save()
             pAllocation.pa_is_allocated = False
             pAllocation.save()
+            msg = 'Tenant Deactivated Successfully.'
     except Exception as e:
+        msg = 'Something went wrong while changing status of tenant.'
+        code = 'error'
         print("\n\nErorr:----------->", e)
-    return HttpResponseRedirect(reverse(view_tenants))
+    return notify(msg=msg, code=code, url=reverse(view_tenants))
 
 
 @for_staff
@@ -1936,7 +1964,8 @@ def add_visit(request):
                                 vs_date=request.POST['visitdate'],
                                 vs_intrest_status=request.
                                 POST['selectedin'])
-        return HttpResponseRedirect(reverse(view_tenants))
+        return notify(msg='Visit Rrecorded Successfully.',
+                      url=reverse(view_tenants))
     else:
         agent_index(request)
 

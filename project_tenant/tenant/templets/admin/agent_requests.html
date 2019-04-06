@@ -64,18 +64,10 @@
                                                     <td>{{ agent.date_joined }}</td>
                                                     <td> <img height="100px" width="100px" class="pimg" src="{{ MEDIA_URL }}{{ agent.ag_profile_image }}" alt="Iamge of {{ agent.username }}"></td>
                                                     <td>
-                                                        <form method="POST" onsubmit="return confirm('Are You sure you want to activate this Agent?')" action="{% url 'admin_agent_request_accept' %}">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="id" value="{{ agent.id }}">
-                                                            <input type="submit" name="submit" class="btn-success btn-rounded" value="Accept">
-                                                        </form>
+                                                        <button data-id="{{ agent.id }}" class="btn-success btn-rounded accept_agent_request">Accept</button>
                                                     </td>
                                                     <td>
-                                                        <form method="POST" onsubmit="return confirm('Are You sure you want to Reject this Agent? You won\'t be able to revert the change.')" action="{% url 'admin_agent_request_reject' %}"> 
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="id" value="{{ agent.id }}">
-                                                            <input type="submit" name="submit" class="btn-danger btn-rounded" value="Reject">
-                                                        </form>
+                                                        <button data-id="{{ agent.id }}" class="btn-danger btn-rounded reject_agent_request">Reject</button>
                                                     </td>
                                                    
                                                 </tr>
