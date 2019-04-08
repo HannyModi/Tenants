@@ -1,0 +1,107 @@
+<div class="row">
+    <div class="span4" style="align-content: center">
+        
+        <table>
+            <tr>
+                <td><b>
+                    property</b>
+                </td>
+                <td>
+                    {{allocation.pa_property.pr_address}},
+                    {{allocation.pa_property.pr_master.cln_master.msp_name}},</br>
+                    {{allocation.pa_property.pr_master.cln_master.msp_address}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Agent</b>
+                </td>
+                <td>
+                    {{tenant.tn_agent.first_name}} {{tenant.tn_agent.last_name}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Agent Contact &nbsp;</b>
+                </td>
+                <td>
+                    {{tenant.tn_agent.ag_contact}}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="span5">
+        <table class="table fixed_header">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Status</th>
+                    <th>Pay off date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% comment %}
+                {% make_list allocation.pa_agreement_date|date:'m' allocation.pa_agreement_end_date|date:'m' as months %}
+                {% endcomment %}
+                {% for rent in rent_data %}
+                <tr>
+                    <td>{{rent.month}}</td>
+                    <td>{{rent.status}}</td>
+                    <td>{{rent.date}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- 
+<table>
+    <tr>
+        <td>
+            property
+        </td>
+        <td>
+            {{allocation.pa_property.pr_address}},
+            {{allocation.pa_property.pr_master.cln_master.msp_name}},</br>
+            {{allocation.pa_property.pr_master.cln_master.msp_address}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Agent
+        </td>
+        <td>
+            {{tenant.tn_agent.first_name}} {{tenant.tn_agent.last_name}}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Agent Contact &nbsp;
+        </td>
+        <td>
+            {{tenant.tn_agent.ag_contact}}
+        </td>
+    </tr>
+</table>
+
+<table class="table fixed_header">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Status</th>
+            <th>Pay off date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% comment %}
+        {% make_list allocation.pa_agreement_date|date:'m' allocation.pa_agreement_end_date|date:'m' as months %}
+        {% endcomment %}
+        {% for rent in rent_data %}
+        <tr>
+            <td>{{rent.month}}</td>
+            <td>{{rent.status}}</td>
+            <td>{{rent.date}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table> -->

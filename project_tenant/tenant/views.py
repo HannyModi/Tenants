@@ -39,8 +39,13 @@ from django.db.models import (Prefetch,
                               Value,
                               Sum
                               )
-from django.db.models.functions import Cast, Concat, TruncMonth
-from datetime import datetime, timedelta
+from django.db.models.functions import (Cast,
+                                        Concat,
+                                        TruncMonth
+                                        )
+from datetime import (datetime,
+                      timedelta
+                      )
 
 # Create your views here.
 
@@ -2448,3 +2453,103 @@ def viewallocationDetails(request):
                       {'allocation': pr,
                        'months': result,
                        'unpaidflag': upflag})
+
+#######################################################################################################################
+# Tenant site views
+#######################################################################################################################
+
+
+def tenant_index(request):
+    return render(request, 'tenant_index.html')
+
+
+def tenant_details(request, tenant_name):
+    tenant_contact = request.GET['tenant_contact']
+    tenant = None
+    pa = None
+    context = dict()
+    rent_details = None
+    try:
+        tenant = TblTenant.objects\
+            .get(tn_name__iexact=tenant_name,
+                 tn_contact=tenant_contact)
+    except Exception as e:
+        print('Error at searching tenant-> ', e)
+        tenant = None
+        return HttpResponse('Profile not found <br>\
+             Please contact to your agent.')
+
+    if tenant and tenant.tn_status == 2 or tenant.tn_status == 3:
+        if tenant.tn_status == 2:
+            pa = TblPropertyAllocation.objects\
+                .filter(pa_is_allocated=False,
+                        pa_tenant=tenant)\
+                .order_by('pk')[:1]
+            if pa.first() is not None:
+                pa = pa.first()
+            else:
+                return HttpResponse('Your Allocation is under\
+                            process.\n No previous record \
+                            found to display.')
+        elif tenant.tn_status == 3:
+            pa = TblPropertyAllocation.objects\
+                .get(pa_is_allocated=True,
+                     pa_tenant=tenant)
+
+        rent_details = TblRentCollection.objects\
+            .filter(rc_allocation=pa)
+
+        print(pa.pa_agreement_date)
+        print(pa.pa_agreement_end_date)
+        last_paid = None
+        recorded = False
+        i = pa.pa_agreement_date
+        rent_data = []
+        delta = timedelta(days=30)
+        while i.month < pa.pa_agreement_end_date.month\
+                or i.year < pa.pa_agreement_end_date.year:
+            if (len(rent_details.values()) > 0):
+                rent = False
+                for r in rent_details:
+                    if i.strftime("%B, %Y") ==\
+                            r.rc_month.strftime("%B, %Y"):
+                        rent = True
+                        break
+                if rent:
+                    rent_data.append({
+                        'month': i.strftime("%B, %Y"),
+                        'status': 'Paid',
+                        'date': r.rc_pay_off_date})
+                else:
+                    if not recorded:
+                        last_paid = i.strftime("%B, %Y")
+                        recorded = True
+                    rent_data.append({
+                        'month': i.strftime("%B, %Y"),
+                        'status': 'Unpaid',
+                        'date': 'Not Paid Yet.'})
+
+            else:
+                rent_data.append({
+                    'month': i.strftime("%B, %Y"),
+                    'status': 'Unpaid',
+                    'date': 'Not Paid Yet.'})
+                if not last_paid:
+                    last_paid = datetime.strftime("%B, %Y")
+            # rent_data.append(i)
+            i += delta
+        for rent in rent_data:
+            print(rent)
+        context = {
+            'tenant': tenant,
+            'allocation': pa,
+            'rent_data': rent_data
+        }
+        return render(request, 'tenant_details.html', context)
+
+    else:
+        return HttpResponse('You don\'t have any active data in the system')
+
+    print(tenant)
+    # return HttpResponse(tenant)
+    return HttpResponse('Something went wrong...')

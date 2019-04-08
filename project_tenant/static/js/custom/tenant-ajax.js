@@ -1035,3 +1035,26 @@ $('#id_ag_contact').live('keyup', function () {
         return (input === 0) ? "" : input.toLocaleString("en-IND");
     });
 })
+
+$('#tenant_contact').live('keyup', function () {
+    $(this).attr('maxlength', '10');
+    var $this = $(this);
+
+    // Get the value.
+    var input = $this.val();
+
+    var input = input.replace(/[\D\s\._\-]+/g, "");
+    // input = input ? parseInt( input, 10 ) : 0;
+
+    $this.val(function () {
+        return (input === 0) ? "" : input.toLocaleString("en-IND");
+    });
+})
+
+$('#tenant_submit').click(function () {
+    var name = $('#tenant_name').val();
+    var contact = $('#tenant_contact').val();
+    $.get('/tenant/'+name+'/', { tenant_contact: contact }, function (data) {
+        $('#tenant_details').html(data);
+    });
+})

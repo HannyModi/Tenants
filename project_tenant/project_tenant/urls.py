@@ -28,4 +28,6 @@ urlpatterns = [
     path('login/',views.do_login, name= 'login'),
     re_path('^$',views.index, name= 'index'),
     re_path('^agent_registration/$',views.agent_registration, name='agent_registration'),
+    re_path('^tenant/$',views.tenant_index,name='tenant_index'),
+    path('tenant/<str:tenant_name>/',views.tenant_details,name='tenant_details'),
 ]+ static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
