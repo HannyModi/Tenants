@@ -73,8 +73,11 @@
                         <option value="2">Not Interested</option>
                         <option value="3">Potential Tenant(More Intrested)</option>
                     </select><br/><br/>
-
+                    {% if tenant and plist or tlist and plist%}
                     <button type="submit" class="btn btn-theme btn-rounded " >Add Visit</button>
+                    {% else %}
+                    <button type="submit" class="btn btn-theme btn-rounded " disabled >Add Visit</button>
+                    {% endif %}
                     {% if not tenant%}
                         <a data-toggle="tooltip" title="Add new tenant to system." href="{% url 'addTenant' %}">New tenant?</a>
                     {% endif %}

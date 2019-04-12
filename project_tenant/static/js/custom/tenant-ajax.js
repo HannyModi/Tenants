@@ -782,7 +782,7 @@ $('#old_tenant').click(function () {
 
         if (data != 0) {
             console.log(data);
-            response = '<select id="selected_tenant" style="width:100%" name="tn_id">' +
+            response = '<select id="selected_tenant" style="width:100%" name="tn_id" required>' +
                 '<option value="" selected>Select Tenant to make him active.</option>';
             $.each(data, function (item, value) {
                 $.each(value, function (i, v) {

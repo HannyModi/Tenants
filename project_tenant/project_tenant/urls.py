@@ -18,16 +18,20 @@ from django.urls import path, re_path, include
 from tenant import views
 from django.conf import settings
 from django.conf.urls.static import static
-from tenant import admin_urls,agent_urls
+from tenant import admin_urls, agent_urls
 
 urlpatterns = [
     path('admin/', include(admin_urls)),
     path('agent/', include(agent_urls)),
     path('admin/', admin.site.urls),
 
-    path('login/',views.do_login, name= 'login'),
-    re_path('^$',views.index, name= 'index'),
-    re_path('^agent_registration/$',views.agent_registration, name='agent_registration'),
-    re_path('^tenant/$',views.tenant_index,name='tenant_index'),
-    path('tenant/<str:tenant_name>/',views.tenant_details,name='tenant_details'),
-]+ static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
+    path('login/', views.do_login, name='login'),
+    path('reset_password', include('password_reset.urls'),
+         name='password_reset_recover'),
+    re_path('^$', views.index, name='index'),
+    re_path('^agent_registration/$', views.agent_registration,
+            name='agent_registration'),
+    re_path('^tenant/$', views.tenant_index, name='tenant_index'),
+    path('tenant/<str:tenant_name>/', views.tenant_details,
+         name='tenant_details'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
