@@ -19,15 +19,20 @@ from tenant import views
 from django.conf import settings
 from django.conf.urls.static import static
 from tenant import admin_urls,agent_urls
+from . import reset_pwd_url
 
 urlpatterns = [
+    # path('accounts/', include('django.contrib.auth.urls')),
+    re_path('^$',views.index, name= 'index'),
     path('admin/', include(admin_urls)),
     path('agent/', include(agent_urls)),
     path('admin/', admin.site.urls),
-
+    path('registration/', include('django.contrib.auth.urls')),
     path('login/',views.do_login, name= 'login'),
-    re_path('^$',views.index, name= 'index'),
+    # path('reset_password/', include(reset_pwd_url)),    
     re_path('^agent_registration/$',views.agent_registration, name='agent_registration'),
+    
+    # template_name='registration/password_reset_done.html'),),
     re_path('^tenant/$',views.tenant_index,name='tenant_index'),
     path('tenant/<str:tenant_name>/',views.tenant_details,name='tenant_details'),
 ]+ static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
