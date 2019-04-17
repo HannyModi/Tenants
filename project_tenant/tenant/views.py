@@ -2382,9 +2382,11 @@ def getAllocatedtenants(request):
 
     else:
         tenantlist = TblPropertyAllocation.objects\
-            .filter(pa_is_allocated=True).filter(~Q(pa_agreement_date=None))\
+            .filter(pa_is_allocated=True,
+                    pa_tenant__tn_agent=request.user
+                    ).filter(~Q(pa_agreement_date=None))\
             .select_related('pa_tenant')\
-            .select_related('pa_property__pr_master__cln_master')\
+            .select_related('pa_property__pr_master__cln_master')
 
         print(tenantlist)
 
@@ -2469,6 +2471,7 @@ def tenant_details(request, tenant_name):
     pa = None
     context = dict()
     rent_details = None
+    rent_data = None
     try:
         tenant = TblTenant.objects\
             .get(tn_name__iexact=tenant_name,
@@ -2476,8 +2479,7 @@ def tenant_details(request, tenant_name):
     except Exception as e:
         print('Error at searching tenant-> ', e)
         tenant = None
-        return HttpResponse('Profile not found <br>\
-             Please contact to your agent.')
+        return render(request, 'tenant_details.html', context)
 
     if tenant and tenant.tn_status == 2 or tenant.tn_status == 3:
         if tenant.tn_status == 2:
@@ -2488,9 +2490,8 @@ def tenant_details(request, tenant_name):
             if pa.first() is not None:
                 pa = pa.first()
             else:
-                return HttpResponse('Your Allocation is under\
-                            process.\n No previous record \
-                            found to display.')
+                return render(request, 'tenant_details.html',
+                              {'tenant': tenant})
         elif tenant.tn_status == 3:
             pa = TblPropertyAllocation.objects\
                 .get(pa_is_allocated=True,
@@ -2540,16 +2541,16 @@ def tenant_details(request, tenant_name):
             i += delta
         for rent in rent_data:
             print(rent)
-        context = {
-            'tenant': tenant,
-            'allocation': pa,
-            'rent_data': rent_data
-        }
-        return render(request, 'tenant_details.html', context)
+    context = {
+        'tenant': tenant,
+        'allocation': pa,
+        'rent_data': rent_data
+    }
+    return render(request, 'tenant_details.html', context)
 
-    else:
-        return HttpResponse('You don\'t have any active data in the system')
+    # else:
+    #     return HttpResponse('You don\'t have any active data in the system')
 
-    print(tenant)
-    # return HttpResponse(tenant)
-    return HttpResponse('Something went wrong...')
+    # print(tenant)
+    # # return HttpResponse(tenant)
+    # return HttpResponse('Something went wrong...')
