@@ -22,11 +22,100 @@ Admin/Home
 <section>
     <div class="container">
         <div class="row">
+            <span class='span3'  >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Total Active Agents</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.total_active_agents }}</center>
+                    </span>
+                </span>
+            </span>
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Free Agents</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.free_agents }}</center>
+                    </span>
+                </span>
+            </span> 
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Agent Requests</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.agent_requests }}</center>
+                    </span>
+                </span>
+            </span>
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Yesterday's Visits</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.yesterdays_visit }}</center>
+                    </span>
+                </span>
+            </span>
+        </div>
+        <div class="row">
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Total Properties</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.totalproperties }}</center>
+                    </span>
+                </span>
+            </span>
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Free Properties</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>
+                            (Not allocates to tenants)
+                            {{ allinfo.free_property }}
+                        </center>
+                    </span>
+                </span>
+            </span>
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Total Tenants</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.total_tenants }}</center>
+                    </span>
+                </span>
+            </span>
+            <span class='span3' >
+                <span class="card bg-secondary text-white" >
+                    <span class="card-header" style="font-size: 0.6cm">
+                        <center>Unmanaged Tenants</center>
+                    </span>
+                    <span class="card-body" style="font-size: 0.4cm">
+                        <center>{{ allinfo.unmanaged_tenantlist }}</center>
+                    </span>
+                </span>
+            </span>
+        </div>
+
+        <div class="row">
             <div class="span12">
-                <div id="container"></div>
+                <h1>Reports</h1>
+                <div id="containermsp"></div>
                     <script src="{% static "js/custom/highcharts.js" %}"></script>
                         <script>
-                            Highcharts.chart('container', {
+                            Highcharts.chart('containermsp', {
                                 chart: {
                                     type: 'column'
                                 },
@@ -120,3 +209,9 @@ Admin/Home
 </section>
 
 {% endblock %}
+
+{% block js %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+{% endblock%}

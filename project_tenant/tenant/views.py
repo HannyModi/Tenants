@@ -200,8 +200,6 @@ def admin_index(request):
         .count()})
     allinfo.update({'totalproperties': TblProperty.objects.filter(
         pr_is_active=True).count()})
-    allinfo['allocated_properties'] = TblProperty.objects.filter(
-        pr_is_active=True, pr_is_allocated=True).count()
     allinfo['free_property'] = TblProperty.objects.filter(
         pr_is_active=True, pr_is_allocated=False).count()
     allinfo['total_tenants'] = TblTenant.objects.filter(
@@ -210,8 +208,10 @@ def admin_index(request):
         Q(id__in=TblAgentAllocation.objects.all()
           .values_list('al_agent', flat=True))
         | Q(is_superuser=True) | Q(is_active=False)).count()
-    # allinfo['agent_requests']=TblAgent.objects.
-    print(allinfo)
+    allinfo['agent_requests']=TblAgent.objects.filter(
+        is_staff=False,is_active=False,is_superuser=False).count()
+    allinfo['unmanaged_tenantlist'] = TblTenant.objects.filter(tn_agent=request.user).count()
+    # print("\n\n\n\n",allinfo)
 
     rent = TblRentCollection.objects\
         .select_related('rc_allocation__pa_property__pr_master__cln_master')\
@@ -227,7 +227,7 @@ def admin_index(request):
     # for year in rent:
     #     print(year)
 
-    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent})
+    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent,'allinfo':allinfo ,})
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
