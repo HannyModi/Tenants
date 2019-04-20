@@ -2,13 +2,25 @@ from django.forms import ModelForm, DateInput
 from django import forms
 from tenant.models import TblTenant, TblAgent
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
+from django.contrib.auth.forms import PasswordResetForm
 
 
 Doc_Choice = [(0, "Select"), (1, "Adhar Card"), (2, "Driving Licence"),
               (3, "Passport"), (4, "Election Card"), (5, "Pan Card"), ]
 # Status = [(-1, "Select Status"), (1, "Visit"), (2, "Deal Accepted aggrement under process"),
 #           (3, "Property handovered"), (4, "Ex-Tenant")]
+
+
+
+class EmailValidationOnForgotPassword(PasswordResetForm):
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not TblAgent.objects.filter(email__iexact=email, is_active=True).exists():
+            msg = "There is no user registered with the specified E-Mail address."
+            self.add_error('email', msg)
+        return email
+
 
 
 class TenantRegistratonForm(ModelForm):

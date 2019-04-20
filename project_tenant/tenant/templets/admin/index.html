@@ -1,6 +1,8 @@
 {% extends 'admin/Base.html' %}
 {% load staticfiles %}
 {% block titleblock %}
+{% comment %} {% load chartit %}
+{{ chart3|load_charts:"container3" }} {% endcomment %}
 Admin/Home
 {% endblock %}
 {% block bodyblock %}
@@ -205,6 +207,9 @@ Admin/Home
 
             </div>
         </div>
+        <!-- <div class="row">
+            <div id="container3"></div>
+        </div> -->
     </div>
 </section>
 

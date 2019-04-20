@@ -9,6 +9,7 @@ from django.shortcuts import (HttpResponseRedirect,
                               render,
                               HttpResponse,
                               redirect,)
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.urls import reverse
 from tenant.decorators import (for_admin,
@@ -46,6 +47,7 @@ from django.db.models.functions import (Cast,
 from datetime import (datetime,
                       timedelta
                       )
+# from chartit import DataPool,Chart
 
 # Create your views here.
 
@@ -87,7 +89,7 @@ def agent_registration(request):
 def do_login(request):
     username = request.POST['username']
     password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
+    user = authenticate(request, username=username, password=password)                           
     if user:
         if user.is_superuser:
             # print("\n\n\n\n Admin \n",user,"\n\n\n")
@@ -226,11 +228,44 @@ def admin_index(request):
 
     # for year in rent:
     #     print(year)
-
-    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent,'allinfo':allinfo ,})
+    # chart3=makecharts(request)
+    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent,'allinfo':allinfo })
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
+
+# @for_admin
+# def makecharts(request):
+#     NewTenantJoinThisMonth=DataPool(
+#         series=[
+#             {
+#                 'options':{
+#                     'source': TblTenant.objects.select_related('tn_agent').filter(tn_joining_date=datetime.now()-timedelta(days=30)).order_by('tn_agent_id')
+#                 },
+#                 'terms':[
+#                     'tn_agent',
+#                     'tn_name',
+#                 ]
+#             }
+#             ])
+#     cht=Chart(
+#         datasource=NewTenantJoinThisMonth,
+#         series_options=[{
+#             'options':{
+#                 'type':'line',
+#                 'stacking':False
+#             },'terms':{
+#                 'tn_agent':['tn_name']
+#             }
+#         }],
+#         chart_options={
+#             'title':{'text':'New Tenant Registrations this month'},
+#             'xAxis':{
+#                 'title':'Number Of tenant'
+#             }
+#         }
+#     )
+#     return cht
 
 
 @for_admin
@@ -2423,38 +2458,44 @@ def viewallocationDetails(request):
         # print("end",propertyobj.pa_agreement_end_date)
         months = []
         delta = timedelta(days=30)
-        while i < pr.pa_agreement_end_date:
-            # print("i",i)
-            months.append(i.strftime("%B, %Y"))
-            # print(i.strftime("%B"))
-            i += delta
-        result = []
+        try: 
+            while i < pr.pa_agreement_end_date:
+                # print("i",i)
+                months.append(i.strftime("%B, %Y"))
+                # print(i.strftime("%B"))
+                i += delta
+            result = []
 
-        recorded = False
-        for m in months:
-            if (len(rentdetails.values()) > 0):
-                rent = False
-                for r in rentdetails:
-                    if m == r.rc_month.strftime("%B, %Y"):
-                        rent = True
-                        break
-                if rent:
-                    result.append([m, "Paid"])
+            recorded = False
+            for m in months:
+                if (len(rentdetails.values()) > 0):
+                    rent = False
+                    for r in rentdetails:
+                        if m == r.rc_month.strftime("%B, %Y"):
+                            rent = True
+                            break
+                    if rent:
+                        result.append([m, "Paid"])
+                    else:
+                        if not recorded:
+                            recorded = True
+                        result.append([m, "Unpaid"])
                 else:
-                    if not recorded:
-                        recorded = True
                     result.append([m, "Unpaid"])
-            else:
-                result.append([m, "Unpaid"])
-        upflag = False
-        for r in result:
-            if "Unpaid" in r:
-                upflag = True
-        print("\n\nUnpaid Flag", upflag)
-        return render(request, 'agent/allocation_details.html',
-                      {'allocation': pr,
-                       'months': result,
-                       'unpaidflag': upflag})
+            upflag = False
+            for r in result:
+                if "Unpaid" in r:
+                    upflag = True
+            print("\n\nUnpaid Flag", upflag)
+            return render(request, 'agent/allocation_details.html',
+                        {'allocation': pr,
+                        'months': result,
+                        'unpaidflag': upflag})
+        except Exception as e:
+            print("No previous allocation ",e)
+            return notify(msg='Tenant has no previous allocation',
+                          url=reverse(allocated_property_list))
+
 
 #######################################################################################################################
 # Tenant site views

@@ -19,7 +19,9 @@ from tenant import views
 from django.conf import settings
 from django.conf.urls.static import static
 from tenant import admin_urls,agent_urls
-from . import reset_pwd_url
+from django.contrib.auth import views as auth_views
+# from . import reset_pwd_url
+from tenant.forms import EmailValidationOnForgotPassword
 
 urlpatterns = [
     # path('accounts/', include('django.contrib.auth.urls')),
@@ -27,6 +29,10 @@ urlpatterns = [
     path('admin/', include(admin_urls)),
     path('agent/', include(agent_urls)),
     path('admin/', admin.site.urls),
+    path('registration/', include('django.contrib.auth.urls')),
+    path('registration/password_reset_form/', auth_views.\
+        PasswordResetView.as_view(form_class=\
+            EmailValidationOnForgotPassword), name='password_reset2'),
     path('registration/', include('django.contrib.auth.urls')),
     path('login/',views.do_login, name= 'login'),
     # path('reset_password/', include(reset_pwd_url)),    
