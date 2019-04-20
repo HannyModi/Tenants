@@ -12,7 +12,7 @@ Admin/Home
             <div class="span12">
                 <div class="inner-heading">
                     <ul class="breadcrumb">
-                        <li><a href="{% url 'agent_index' %}"><i class="icon-home"></i> Home</a> 
+                        <li><a href="{% url 'agent_index' %}"><i class="icon-home"></i> Home</a>
                     </ul>
                     <h2>Home</h2>
                 </div>
@@ -24,18 +24,21 @@ Admin/Home
 <section>
     <div class="container">
         <div class="row">
-            <span class='span3'  >
-                <span class="card bg-secondary text-white" >
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Total Active Agents</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.total_active_agents }}</center>
+            <a href="{% url 'admin_agent_active'%}">
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Total Active Agents</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.total_active_agents }}</center>
+                        </span>
                     </span>
                 </span>
-            </span>
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
+            </a>
+
+            <span class='span3'>
+                <span class="card bg-secondary text-white">
                     <span class="card-header" style="font-size: 0.6cm">
                         <center>Free Agents</center>
                     </span>
@@ -43,19 +46,22 @@ Admin/Home
                         <center>{{ allinfo.free_agents }}</center>
                     </span>
                 </span>
-            </span> 
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Agent Requests</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.agent_requests }}</center>
+            </span>
+
+            <a href="{% url 'admin_agent_requests'%}">
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Agent Requests</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.agent_requests }}</center>
+                        </span>
                     </span>
                 </span>
-            </span>
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
+            </a>
+            <span class='span3'>
+                <span class="card bg-secondary text-white">
                     <span class="card-header" style="font-size: 0.6cm">
                         <center>Yesterday's Visits</center>
                     </span>
@@ -66,18 +72,20 @@ Admin/Home
             </span>
         </div>
         <div class="row">
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Total Properties</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.totalproperties }}</center>
+            <a href="{% url 'admin_view_master_property' %}">
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Total Properties</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.totalproperties }}</center>
+                        </span>
                     </span>
                 </span>
-            </span>
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
+            </a>
+            <span class='span3'>
+                <span class="card bg-secondary text-white">
                     <span class="card-header" style="font-size: 0.6cm">
                         <center>Free Properties</center>
                     </span>
@@ -89,8 +97,8 @@ Admin/Home
                     </span>
                 </span>
             </span>
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
+            <span class='span3'>
+                <span class="card bg-secondary text-white">
                     <span class="card-header" style="font-size: 0.6cm">
                         <center>Total Tenants</center>
                     </span>
@@ -99,108 +107,119 @@ Admin/Home
                     </span>
                 </span>
             </span>
-            <span class='span3' >
-                <span class="card bg-secondary text-white" >
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Unmanaged Tenants</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.unmanaged_tenantlist }}</center>
+            <a href="{% url 'admin_unmanaged_tenants' %}">
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Unmanaged Tenants</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.unmanaged_tenantlist }}</center>
+                        </span>
                     </span>
                 </span>
-            </span>
+            </a>
         </div>
 
         <div class="row">
             <div class="span12">
                 <h1>Reports</h1>
                 <div id="containermsp"></div>
-                    <script src="{% static "js/custom/highcharts.js" %}"></script>
-                        <script>
-                            Highcharts.chart('containermsp', {
-                                chart: {
-                                    type: 'column'
-                                },
-                                title: {
-                                    text: 'Property Details'
-                                },
-                                xAxis: {
-                                    categories: [
-                                        {% for entry in msp_list %}'{{ entry.msp_name }}, <br/> {{entry.msp_address}}'{% if not forloop.last %}, {% endif %}{% endfor %}
+                <script src="{% static "js/custom/highcharts.js" %}"></script>
+                <script>
+                    Highcharts.chart('containermsp', {
+                        chart: {
+                            type: 'column'
+                        },
+                        title: {
+                            text: 'Property Details'
+                        },
+                        xAxis: {
+                            categories: [
+                                {% for entry in msp_list %}'{{ entry.msp_name }}, <br/> {{entry.msp_address}}'{% if not forloop.last %}, {% endif %}{% endfor %}
                                     ]
                                 },
-                                series: [{
-                                    name: 'Allocated Properties',
-                                    data: [
-                                        {% for entry in msp_list %}{{ entry.allocated_properties }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        series: [{
+                            name: 'Allocated Properties',
+                            data: [
+                                {% for entry in msp_list %}{{ entry.allocated_properties }}{% if not forloop.last %}, {% endif %} {% endfor %}
                                     ],
-                                    color: 'green'
+                    color: 'green'
                                 }, {
-                                    name: 'Unallocated Properties',
-                                    data: [
-                                        {% for entry in msp_list %}{{ entry.unallocated_properties }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        name: 'Unallocated Properties',
+                            data: [
+                                {% for entry in msp_list %} { { entry.unallocated_properties } } {% if not forloop.last %}, {% endif %} {% endfor %}
                                     ],
-                                    color:'orange'
+                    color: 'orange'
                                 }]
                             });
-                        </script>
-            </div>    
+                </script>
+            </div>
         </div>
         <div class="row">
             <div id="monthlyrent">
                 <script>
                     Highcharts.chart('monthlyrent', {
-                                title: {
-                                    text: 'Rent Collection'
+                        chart: {
+                                type: 'spline'
+                            },
+                        title: {
+                            text: 'Rent Collection'
+                        },
+                        xAxis: {
+                            categories: [{%for data in rent %}'{{ data.month|date:"F, Y" }}',{% endfor %}]
                                 },
-                                xAxis: {
-                                    categories: [{%for data in rent %}'{{ data.month|date:"F, Y" }}',{% endfor %}]
-                                },
-                                yAxis: {
-                                    title: {
-                                        text: 'Rupees Collected'
+                        yAxis: {
+                            title: {
+                                text: 'Rupees Collected'
+                            },
+                            labels: {
+                                    formatter: function () {
+                                        return this.value;
                                     }
+                            }
+                        },
+                        plotOptions: {
+                            line: {
+                                dataLabels: {
+                                    enabled: true
                                 },
-                                 plotOptions: {
-                                        line: {
-                                            dataLabels: {
-                                                enabled: true
-                                            },
-                                            enableMouseTracking: false
-                                        }
-                                    },
+                                enableMouseTracking: false
+                            }
+                        },
 
-                                legend: {
-                                    layout: 'vertical',
-                                    align: 'right',
-                                    verticalAlign: 'middle'
-                                },
+                        legend: {
+                            layout: 'vertical',
+                            align: 'right',
+                            verticalAlign: 'middle'
+                        },
 
-                                
 
-                                series: [
-                                    {% for data in rent %}
-                                    {
-                                    name: '{{data.msp}}',
-                                    data: '{{data.month|date:"F, Y"}}'
-                                    },
-                                    {% endfor %}
+
+                        series: [
+                            {% for data in rent %}
+                    {
+                        name: '{{data.msp_name}}',
+                        data: '{{data.sum}}',
+                            {% comment %} data: '{{data.month|date:"F, Y"}}' {% endcomment %}
+                    },
+                    {% endfor %}
                                 ],
 
-                                responsive: {
-                                    rules: [{
-                                        condition: {
-                                            maxWidth: 500
-                                        },
-                                        chartOptions: {
-                                            legend: {
-                                                layout: 'horizontal',
-                                                align: 'center',
-                                                verticalAlign: 'bottom'
-                                            }
-                                        }
-                                    }]
+                    responsive: {
+                        rules: [{
+                            condition: {
+                                maxWidth: 500
+                            },
+                            chartOptions: {
+                                legend: {
+                                    layout: 'horizontal',
+                                    align: 'center',
+                                    verticalAlign: 'bottom'
                                 }
+                            }
+                        }]
+                    }
 
                             });
                 </script>
@@ -216,7 +235,7 @@ Admin/Home
 {% endblock %}
 
 {% block js %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 {% endblock%}

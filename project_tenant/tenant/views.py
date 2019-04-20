@@ -210,26 +210,37 @@ def admin_index(request):
         Q(id__in=TblAgentAllocation.objects.all()
           .values_list('al_agent', flat=True))
         | Q(is_superuser=True) | Q(is_active=False)).count()
-    allinfo['agent_requests']=TblAgent.objects.filter(
-        is_staff=False,is_active=False,is_superuser=False).count()
-    allinfo['unmanaged_tenantlist'] = TblTenant.objects.filter(tn_agent=request.user).count()
+    allinfo['agent_requests'] = TblAgent.objects.filter(
+        is_staff=False, is_active=False, is_superuser=False).count()
+    allinfo['unmanaged_tenantlist'] = TblTenant.objects.filter(
+        tn_agent=request.user).count()
     # print("\n\n\n\n",allinfo)
 
-    rent = TblRentCollection.objects\
-        .select_related('rc_allocation__pa_property__pr_master__cln_master')\
-        .filter(rc_pay_off_date__lt=datetime.now()
-                + timedelta(days=365))\
-        .annotate(month=TruncMonth('rc_pay_off_date'))\
-        .values('month')\
-        .annotate(sum=Sum('rc_allocation__pa_final_rent'))\
-        .annotate(msp=F('rc_allocation__pa_property__pr_master__cln_master__msp_name'))\
-        .order_by('month')\
-        .values('msp', 'month', 'sum')
+    # rent = TblRentCollection.objects\
+    #     .select_related('rc_allocation__pa_property__pr_master__cln_master')\
+    #     .filter(rc_pay_off_date__lt=datetime.now()
+    #             + timedelta(days=365))\
+    #     .annotate(month=TruncMonth('rc_pay_off_date'))\
+    #     .values('month')\
+    #     .annotate(sum=Sum('rc_allocation__pa_final_rent'))\
+    #     .annotate(msp=F('rc_allocation__pa_property__pr_master__cln_master__msp_name'))\
+    #     .order_by('month')\
+    #     .values('msp', 'month', 'sum')
+
+    rent = TblMasterProperty.objects.all()\
+        .annotate(sum=Sum(
+            'tblmasterpropertyclone__tblproperty__' +
+            'tblpropertyallocation__tblrentcollection__' +
+            'rc_allocation__pa_final_rent'
+        ))
+
+    for r in rent.values('msp_name', 'sum'):
+        print(r)
 
     # for year in rent:
     #     print(year)
-    # chart3=makecharts(request)
-    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent,'allinfo':allinfo })
+
+    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent, 'allinfo': allinfo, })
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
@@ -293,7 +304,7 @@ def agent_request_accept(request):
         agent.verified_save()
         return HttpResponse(1)
     except Exception as e:
-        print('Error in agent request accept')
+        print('Error in agent request accept:',e)
         return HttpResponse(0)
 
 # deleting the agent request@for_admin
@@ -304,7 +315,7 @@ def agent_request_reject(request):
         TblAgent.objects.filter(id=id).delete()
         return HttpResponse(1)
     except Exception as e:
-        print('Error in agent request reject')
+        print('Error in agent request reject',e)
         return HttpResponse(0)
 
 
