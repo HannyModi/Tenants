@@ -44,8 +44,9 @@ from django.db.models.functions import (Cast,
                                         TruncMonth
                                         )
 from datetime import (datetime,
-                      timedelta
+                      timedelta,
                       )
+import time
 
 # Create your views here.
 
@@ -225,14 +226,42 @@ def admin_index(request):
     #     .order_by('month')\
     #     .values('msp', 'month', 'sum')
 
-    rent = TblMasterProperty.objects.all()\
-        .annotate(sum=Sum(
-            'tblmasterpropertyclone__tblproperty__' +
-            'tblpropertyallocation__tblrentcollection__' +
-            'rc_allocation__pa_final_rent'
-        ))
+    now = time.localtime()
+    months = [time.localtime(
+        time.mktime(
+            (now.tm_year,
+             now.tm_mon - n,
+              1, 0, 0, 0, 0, 0, 0)
+        )
+    )[:2] for n in range(12)]
+    rent = []
+    for month in months:
+        data = TblMasterProperty.objects.all()\
+            .annotate(sum=Sum(
+                'tblmasterpropertyclone__tblproperty__' +
+                'tblpropertyallocation__tblrentcollection__' +
+                'rc_allocation__pa_final_rent',
+                filter=Q(
+                    Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=month[1]),
+                    Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=month[0])
+                )
+            )
+        ).values('msp_name','sum')
+        rent.append({
+            'month': datetime.strptime(
+                '01-'+str(month[1])+'-'+str(month[0]),
+                '%d-%m-%Y'
+            ),
+            'rent': data})
+    
+    # rent = TblMasterProperty.objects.all()\
+    #     .annotate(sum=Sum(
+    #         'tblmasterpropertyclone__tblproperty__' +
+    #         'tblpropertyallocation__tblrentcollection__' +
+    #         'rc_allocation__pa_final_rent'
+    #     ))
 
-    for r in rent.values('msp_name', 'sum'):
+    for r in rent:
         print(r)
 
     # for year in rent:
