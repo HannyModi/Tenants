@@ -49,9 +49,9 @@ Add Rent
             <input type="text" disabled name="rentmonth" id="rentmonth" value="{{last_paid}}" /><br />
             <label>
               Receipt Number :</label>
-            <input type="number" class="decimal_input" style="width:100%" name="reciptno" id="receiptno" /><br />
+            <input type="number" class="decimal_input" style="width:100%" name="reciptno" required id="receiptno" /><br />
             Upload Receipt :</label>
-            <input type="file" accept="image/gif, image/jpeg, image/png" id="receiptpic" name="reciptpic" /><br /><br />
+            <input type="file" accept="image/gif, image/jpeg, image/png" id="receiptpic" name="reciptpic" required/><br /><br />
             <center><button type="submit" class="btn btn-rounded btn-theme" value="submit">Add Rent</center>
           </form>
           {% elif unpaidflag == False %}

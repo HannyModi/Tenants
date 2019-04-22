@@ -2,8 +2,8 @@
 {% load staticfiles %}
 {% block titleblock %}
 {% comment %} {% load chartit %}
-{{ chart3|load_charts:"container3" }} {% endcomment %}
-Admin/Home
+{ { chart3 | load_charts: "container3" } } {% endcomment %}
+Admin / Home
 {% endblock %}
 {% block bodyblock %}
 <section id="inner-headline">
@@ -14,228 +14,214 @@ Admin/Home
                     <ul class="breadcrumb">
                         <li><a href="{% url 'agent_index' %}"><i class="icon-home"></i> Home</a>
                     </ul>
-                    <h2>Home</h2>
+                        <h2>Home</h2>
+                </div>
                 </div>
             </div>
         </div>
-    </div>
 </section>
 
-<section>
-    <div class="container">
-        <div class="row">
-            <a href="{% url 'admin_agent_active'%}">
-                <span class='span3'>
-                    <span class="card bg-secondary text-white">
-                        <span class="card-header" style="font-size: 0.6cm">
-                            <center>Total Active Agents</center>
-                        </span>
-                        <span class="card-body" style="font-size: 0.4cm">
-                            <center>{{ allinfo.total_active_agents }}</center>
+    <section>
+        <div class="container">
+            <div class="row">
+                <a href="{% url 'admin_agent_active'%}">
+                    <span class='span3'>
+                        <span class="card bg-secondary text-white">
+                            <span class="card-header" style="font-size: 0.6cm">
+                                <center>Total Active Agents</center>
+                            </span>
+                            <span class="card-body" style="font-size: 0.4cm">
+                                <center>{{ allinfo.total_active_agents }}</center>
+                            </span>
                         </span>
                     </span>
-                </span>
-            </a>
+                </a>
 
-            <span class='span3'>
-                <span class="card bg-secondary text-white">
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Free Agents</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.free_agents }}</center>
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Free Agents</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.free_agents }}</center>
+                        </span>
                     </span>
                 </span>
-            </span>
 
-            <a href="{% url 'admin_agent_requests'%}">
+                <a href="{% url 'admin_agent_requests'%}">
+                    <span class='span3'>
+                        <span class="card bg-secondary text-white">
+                            <span class="card-header" style="font-size: 0.6cm">
+                                <center>Agent Requests</center>
+                            </span>
+                            <span class="card-body" style="font-size: 0.4cm">
+                                <center>{{ allinfo.agent_requests }}</center>
+                            </span>
+                        </span>
+                    </span>
+                </a>
                 <span class='span3'>
                     <span class="card bg-secondary text-white">
                         <span class="card-header" style="font-size: 0.6cm">
-                            <center>Agent Requests</center>
+                            <center>Yesterday's Visits</center>
                         </span>
                         <span class="card-body" style="font-size: 0.4cm">
-                            <center>{{ allinfo.agent_requests }}</center>
+                            <center>{{ allinfo.yesterdays_visit }}</center>
                         </span>
                     </span>
                 </span>
-            </a>
-            <span class='span3'>
-                <span class="card bg-secondary text-white">
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Yesterday's Visits</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.yesterdays_visit }}</center>
-                    </span>
-                </span>
-            </span>
-        </div>
-        <div class="row">
-            <a href="{% url 'admin_view_master_property' %}">
-                <span class='span3'>
-                    <span class="card bg-secondary text-white">
-                        <span class="card-header" style="font-size: 0.6cm">
-                            <center>Total Properties</center>
-                        </span>
-                        <span class="card-body" style="font-size: 0.4cm">
-                            <center>{{ allinfo.totalproperties }}</center>
-                        </span>
-                    </span>
-                </span>
-            </a>
-            <span class='span3'>
-                <span class="card bg-secondary text-white">
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Free Properties</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>
-                            (Not allocates to tenants)
-                            {{ allinfo.free_property }}
-                        </center>
-                    </span>
-                </span>
-            </span>
-            <span class='span3'>
-                <span class="card bg-secondary text-white">
-                    <span class="card-header" style="font-size: 0.6cm">
-                        <center>Total Tenants</center>
-                    </span>
-                    <span class="card-body" style="font-size: 0.4cm">
-                        <center>{{ allinfo.total_tenants }}</center>
-                    </span>
-                </span>
-            </span>
-            <a href="{% url 'admin_unmanaged_tenants' %}">
-                <span class='span3'>
-                    <span class="card bg-secondary text-white">
-                        <span class="card-header" style="font-size: 0.6cm">
-                            <center>Unmanaged Tenants</center>
-                        </span>
-                        <span class="card-body" style="font-size: 0.4cm">
-                            <center>{{ allinfo.unmanaged_tenantlist }}</center>
-                        </span>
-                    </span>
-                </span>
-            </a>
-        </div>
-
-        <div class="row">
-            <div class="span12">
-                <h1>Reports</h1>
-                <div id="containermsp"></div>
-                <script src="{% static "js/custom/highcharts.js" %}"></script>
-                <script>
-                    Highcharts.chart('containermsp', {
-                        chart: {
-                            type: 'column'
-                        },
-                        title: {
-                            text: 'Property Details'
-                        },
-                        xAxis: {
-                            categories: [
-                                {% for entry in msp_list %}'{{ entry.msp_name }}, <br/> {{entry.msp_address}}'{% if not forloop.last %}, {% endif %}{% endfor %}
-                                    ]
-                                },
-                        series: [{
-                            name: 'Allocated Properties',
-                            data: [
-                                {% for entry in msp_list %}{{ entry.allocated_properties }}{% if not forloop.last %}, {% endif %} {% endfor %}
-                                    ],
-                    color: 'green'
-                                }, {
-                        name: 'Unallocated Properties',
-                            data: [
-                                {% for entry in msp_list %} { { entry.unallocated_properties } } {% if not forloop.last %}, {% endif %} {% endfor %}
-                                    ],
-                    color: 'orange'
-                                }]
-                            });
-                </script>
             </div>
-        </div>
-        <div class="row">
-            <div id="monthlyrent">
-                <script>
-                    Highcharts.chart('monthlyrent', {
-                        chart: {
+            <div class="row">
+                <a href="{% url 'admin_view_master_property' %}">
+                    <span class='span3'>
+                        <span class="card bg-secondary text-white">
+                            <span class="card-header" style="font-size: 0.6cm">
+                                <center>Total Properties</center>
+                            </span>
+                            <span class="card-body" style="font-size: 0.4cm">
+                                <center>{{ allinfo.totalproperties }}</center>
+                            </span>
+                        </span>
+                    </span>
+                </a>
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Free Properties</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>
+                                (Not allocates to tenants)
+                            {{ allinfo.free_property }}
+                            </center>
+                        </span>
+                    </span>
+                </span>
+                <span class='span3'>
+                    <span class="card bg-secondary text-white">
+                        <span class="card-header" style="font-size: 0.6cm">
+                            <center>Total Tenants</center>
+                        </span>
+                        <span class="card-body" style="font-size: 0.4cm">
+                            <center>{{ allinfo.total_tenants }}</center>
+                        </span>
+                    </span>
+                </span>
+                <a href="{% url 'admin_unmanaged_tenants' %}">
+                    <span class='span3'>
+                        <span class="card bg-secondary text-white">
+                            <span class="card-header" style="font-size: 0.6cm">
+                                <center>Unmanaged Tenants</center>
+                            </span>
+                            <span class="card-body" style="font-size: 0.4cm">
+                                <center>{{ allinfo.unmanaged_tenantlist }}</center>
+                            </span>
+                        </span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="span12">
+                    <h1>Reports</h1>
+                    <div id="containermsp"></div>
+                    <script src="{% static "js/custom/highcharts.js" %}"></script>
+                    <script>
+                        Highcharts.chart('containermsp', {
+                            chart: {
+                            type: 'column'
+                            },
+                            title: {
+                            text: 'Property Details'
+                            },
+                            xAxis: {
+                            categories: [
+                                        {% for entry in msp_list %}'{{ entry.msp_name }}, <br /> {{ entry.msp_address }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+                                        ]
+                                    },
+                            series: [{
+                                name: 'Allocated Properties',
+                                data: [
+                                        {% for entry in msp_list %}{{ entry.allocated_properties }}{% if not forloop.last %}, {% endif %} {% endfor %}
+                                        ],
+                                color: 'green'
+                                        }, {
+                                name: 'Unallocated Properties',
+                                data: [
+                                        {% for entry in msp_list %} {{ entry.unallocated_properties }} {% if not forloop.last %}, {% endif %} {% endfor %}
+                                    ],
+                                color: 'orange'
+                                    }]
+                            });
+                    </script>
+                </div>
+            </div>
+          
+            <div class="row">
+                <div id="monthlyrent"></div>
+                    <script>
+                        Highcharts.chart('monthlyrent', {
+                            chart: {
                                 type: 'spline'
                             },
-                        title: {
-                            text: 'Rent Collection'
-                        },
-                        xAxis: {
-                            categories: [{%for data in rent %}'{{ data.month|date:"F, Y" }}',{% endfor %}]
-                                },
-                        yAxis: {
                             title: {
-                                text: 'Rupees Collected'
+                                text: 'Rent Collection'
                             },
-                            labels: {
-                                    formatter: function () {
-                                        return this.value;
+                            {% comment %} xAxis: {
+                                title: {
+                                    text: 'Mohths'
                                     }
-                            }
-                        },
-                        plotOptions: {
-                            line: {
-                                dataLabels: {
-                                    enabled: true
-                                },
-                                enableMouseTracking: false
-                            }
-                        },
-
-                        legend: {
-                            layout: 'vertical',
-                            align: 'right',
-                            verticalAlign: 'middle'
-                        },
-
-
-
-                        series: [
-                            {% for data in rent %}
-                    {
-                        name: '{{data.msp_name}}',
-                        data: '{{data.sum}}',
-                            {% comment %} data: '{{data.month|date:"F, Y"}}' {% endcomment %}
-                    },
-                    {% endfor %}
-                                ],
-
-                    responsive: {
-                        rules: [{
-                            condition: {
-                                maxWidth: 500
+                                {% comment %} categories: [{% for data in rent %}{% for d in data.rent %}{% for a in d %}'{{ a.month }}',{% endfor %}{% endfor %}{% endfor %}] 
                             },
-                            chartOptions: {
-                                legend: {
-                                    layout: 'horizontal',
-                                    align: 'center',
-                                    verticalAlign: 'bottom'
-                                }
-                            }
-                        }]
-                    }
-
-                            });
-                </script>
-
-            </div>
-        </div>
+                            yAxis: {
+                                title: {
+                                    text: 'Rupees Collected'
+                                    }
+                                }, {% endcomment %}
+                            
+                            legend: {
+                                layout: 'vertical',
+                                align: 'right',
+                                verticalAlign: 'middle'
+                                },
+                            series: [
+                                        {% for rentdata in rent %}
+                                        {
+                                            name: '{{ rentdata.msp }}',
+                                            
+                                            data: [{% for d in rentdata.rent %}{% for a in d %}'{{a.rent}}',{% endfor %}{% endfor %}],
+                                            
+                                        },
+                                        {% endfor %}
+                                ],
+                                responsive: {
+                                        rules: [{
+                                            condition: {
+                                                maxWidth: 500
+                                            },
+                                            chartOptions: {
+                                                legend: {
+                                                    layout: 'horizontal',
+                                                    align: 'center',
+                                                    verticalAlign: 'bottom'
+                                                }
+                                            }
+                                        }]
+                                    }
+                                });
+                    </script>
+            </div> 
         <!-- <div class="row">
             <div id="container3"></div>
         </div> -->
-    </div>
-</section>
+
+        </div>
+    </section>
 
 {% endblock %}
 
 {% block js %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-{% endblock%}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+{% endblock %}

@@ -45,9 +45,9 @@ from django.db.models.functions import (Cast,
                                         TruncMonth
                                         )
 from datetime import (datetime,
-                      timedelta
+                      timedelta,
                       )
-# from chartit import DataPool,Chart
+import time
 
 # Create your views here.
 
@@ -89,7 +89,7 @@ def agent_registration(request):
 def do_login(request):
     username = request.POST['username']
     password = request.POST['password']
-    user = authenticate(request, username=username, password=password)                           
+    user = authenticate(request, username=username, password=password)
     if user:
         if user.is_superuser:
             # print("\n\n\n\n Admin \n",user,"\n\n\n")
@@ -227,20 +227,78 @@ def admin_index(request):
     #     .order_by('month')\
     #     .values('msp', 'month', 'sum')
 
-    rent = TblMasterProperty.objects.all()\
-        .annotate(sum=Sum(
-            'tblmasterpropertyclone__tblproperty__' +
-            'tblpropertyallocation__tblrentcollection__' +
-            'rc_allocation__pa_final_rent'
-        ))
+    # now = time.localtime()
+    # months = [time.localtime(
+    #     time.mktime(
+    #         (now.tm_year,
+    #          now.tm_mon - n,
+    #           1, 0, 0, 0, 0, 0, 0)
+    #     )
+    # )[:2] for n in range(7)]
+    # rent = []
+    # allmonths = []
+    # months.sort()
+    # print(months)
+    # for month in months:
+    #     data = TblMasterProperty.objects.all()\
+    #         .annotate(sum=Sum(
+    #             'tblmasterpropertyclone__tblproperty__' +
+    #             'tblpropertyallocation__tblrentcollection__' +
+    #             'rc_allocation__pa_final_rent',
+    #             filter=Q(
+    #                 Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=month[1]),
+    #                 Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=month[0])
+    #             )
+    #         )
+    #     ).values('msp_name', 'sum')
+       
+        
+    #     rent.append(data)
+    #     allmonths.append({
+    #         'month': datetime.strptime(
+    #             str(month[1])+'-'+str(month[0]),
+    #             '%m-%Y'
+    #         )})
 
-    for r in rent.values('msp_name', 'sum'):
+    # # rent = TblMasterProperty.objects.all()\
+    # #     .annotate(sum=Sum(
+    # #         'tblmasterpropertyclone__tblproperty__' +
+    # #         'tblpropertyallocation__tblrentcollection__' +
+    # #         'rc_allocation__pa_final_rent'
+    # #     ))
+
+    # # for r in rent:
+    # #     print(r)
+
+    # # for year in rent:
+    # #     print(year)
+
+    rent = []
+
+    masterproperties = TblMasterProperty.objects.all()
+    for masterproperty in masterproperties:
+        data = TblRentCollection.objects\
+            .filter(rc_pay_off_date__lt=datetime.now()
+                    + timedelta(days=365),
+                    rc_allocation__pa_property__pr_master__cln_master=masterproperty)\
+            .annotate(month=TruncMonth('rc_pay_off_date'))\
+            .values('month')\
+            .annotate(rent=Sum('rc_allocation__pa_final_rent'))\
+            .order_by('month')
+            # print
+        rent.append(
+            {
+                'msp':masterproperty.msp_name,
+                # 'month':data.month,
+                'rent':[data.values('rent','month')]
+            }
+        )
+
+    for r in rent:
         print(r)
 
-    # for year in rent:
-    #     print(year)
 
-    return render(request, 'admin/index.html', {'msp_list': msp_list, 'rent': rent, 'allinfo': allinfo, })
+    return render(request, 'admin/index.html', {'msp_list': msp_list,'allinfo': allinfo,'rent':rent})
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
@@ -304,7 +362,7 @@ def agent_request_accept(request):
         agent.verified_save()
         return HttpResponse(1)
     except Exception as e:
-        print('Error in agent request accept:',e)
+        print('Error in agent request accept:', e)
         return HttpResponse(0)
 
 # deleting the agent request@for_admin
@@ -315,7 +373,7 @@ def agent_request_reject(request):
         TblAgent.objects.filter(id=id).delete()
         return HttpResponse(1)
     except Exception as e:
-        print('Error in agent request reject',e)
+        print('Error in agent request reject', e)
         return HttpResponse(0)
 
 
@@ -2390,7 +2448,8 @@ def add_rent_collected(request):
                     rc_recipt_no=request.POST['reciptno'],
                     rc_recipt=request.FILES['reciptpic'],
                     rc_month=paymonth,
-                    rc_pay_off_date=datetime.now())
+                    rc_pay_off_date=datetime.now(),
+                    rc_agent=request.user)
         addrent.save()
         return redirect('/agent/add_rent/?pid='
                         + str(allocation.pa_property.id))
@@ -2469,7 +2528,7 @@ def viewallocationDetails(request):
         # print("end",propertyobj.pa_agreement_end_date)
         months = []
         delta = timedelta(days=30)
-        try: 
+        try:
             while i < pr.pa_agreement_end_date:
                 # print("i",i)
                 months.append(i.strftime("%B, %Y"))
@@ -2499,11 +2558,11 @@ def viewallocationDetails(request):
                     upflag = True
             print("\n\nUnpaid Flag", upflag)
             return render(request, 'agent/allocation_details.html',
-                        {'allocation': pr,
-                        'months': result,
-                        'unpaidflag': upflag})
+                          {'allocation': pr,
+                           'months': result,
+                           'unpaidflag': upflag})
         except Exception as e:
-            print("No previous allocation ",e)
+            print("No previous allocation ", e)
             return notify(msg='Tenant has no previous allocation',
                           url=reverse(allocated_property_list))
 
