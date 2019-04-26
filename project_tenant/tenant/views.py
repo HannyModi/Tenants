@@ -42,12 +42,14 @@ from django.db.models import (Prefetch,
                               )
 from django.db.models.functions import (Cast,
                                         Concat,
-                                        TruncMonth
+                                        TruncMonth,
+                                        Coalesce,
                                         )
 from datetime import (datetime,
                       timedelta,
                       )
 import time
+# from django.db.models.lookups import
 
 # Create your views here.
 
@@ -227,6 +229,7 @@ def admin_index(request):
     #     .order_by('month')\
     #     .values('msp', 'month', 'sum')
 
+    # rent backup
     # now = time.localtime()
     # months = [time.localtime(
     #     time.mktime(
@@ -234,11 +237,8 @@ def admin_index(request):
     #          now.tm_mon - n,
     #           1, 0, 0, 0, 0, 0, 0)
     #     )
-    # )[:2] for n in range(7)]
+    # )[:2] for n in range(12)]
     # rent = []
-    # allmonths = []
-    # months.sort()
-    # print(months)
     # for month in months:
     #     data = TblMasterProperty.objects.all()\
     #         .annotate(sum=Sum(
@@ -250,55 +250,369 @@ def admin_index(request):
     #                 Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=month[0])
     #             )
     #         )
-    #     ).values('msp_name', 'sum')
-       
-        
-    #     rent.append(data)
-    #     allmonths.append({
+    #     ).values('msp_name','sum')
+    #     rent.append({
     #         'month': datetime.strptime(
-    #             str(month[1])+'-'+str(month[0]),
-    #             '%m-%Y'
-    #         )})
+    #             '01-'+str(month[1])+'-'+str(month[0]),
+    #             '%d-%m-%Y'
+    #         ),
+    #         'rent': data})
 
-    # # rent = TblMasterProperty.objects.all()\
-    # #     .annotate(sum=Sum(
-    # #         'tblmasterpropertyclone__tblproperty__' +
-    # #         'tblpropertyallocation__tblrentcollection__' +
-    # #         'rc_allocation__pa_final_rent'
-    # #     ))
-
-    # # for r in rent:
-    # #     print(r)
-
-    # # for year in rent:
-    # #     print(year)
-
-    rent = []
-
-    masterproperties = TblMasterProperty.objects.all()
-    for masterproperty in masterproperties:
-        data = TblRentCollection.objects\
-            .filter(rc_pay_off_date__lt=datetime.now()
-                    + timedelta(days=365),
-                    rc_allocation__pa_property__pr_master__cln_master=masterproperty)\
-            .annotate(month=TruncMonth('rc_pay_off_date'))\
-            .values('month')\
-            .annotate(rent=Sum('rc_allocation__pa_final_rent'))\
-            .order_by('month')
-            # print
-        rent.append(
-            {
-                'msp':masterproperty.msp_name,
-                # 'month':data.month,
-                'rent':[data.values('rent','month')]
-            }
+    now = time.localtime()
+    months = [time.localtime(
+        time.mktime(
+            (now.tm_year,
+             now.tm_mon - n,
+              1, 0, 0, 0, 0, 0, 0)
         )
+    )[:2] for n in range(12)]
+    months.sort()
+    # rent = []
+    # for month in months:
+    #     data = TblMasterProperty.objects.all()\
+    #         .annotate(sum=Sum(
+    #             'tblmasterpropertyclone__tblproperty__' +
+    #             'tblpropertyallocation__tblrentcollection__' +
+    #             'rc_allocation__pa_final_rent',
+    #             filter=Q(
+    #                 Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=month[1]),
+    #                 Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=month[0])
+    #             )
+    #         )
+    #     ).values('msp_name','sum')
+    #     rent.append({
+    #         'month': datetime.strptime(
+    #             '01-'+str(month[1])+'-'+str(month[0]),
+    #             '%d-%m-%Y'
+    #         ),
+    #         'rent': data})
 
-    for r in rent:
-        print(r)
+    # rent = TblMasterProperty.objects.all()\
+    #     .annotate(sum=Sum(
+    #         'tblmasterpropertyclone__tblproperty__' +
+    #         'tblpropertyallocation__tblrentcollection__' +
+    #         'rc_allocation__pa_final_rent'
+    #     ))
+
+    # rent = TblRentCollection.objects.all()\
+    #     .annotate(month=F('rc_month'))
+
+    # rent = []
+
+    masterproperties = TblMasterProperty.objects.all()\
+        .annotate(
+            month1=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[0][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[0][0])
+                    )
+                ), 0
+            ),
+
+            month2=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[1][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[1][0])
+                    )
+                ), 0
+            ),
+            month3=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[2][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[2][0])
+                    )
+                ), 0
+            ),
+            month4=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[3][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[3][0])
+                    )
+                ), 0
+            ),
+            month5=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[4][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[4][0])
+                    )
+                ), 0
+            ),
+            month6=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[5][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[5][0])
+                    )
+                ), 0
+            ),
+            month7=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[6][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[6][0])
+                    )
+                ), 0
+            ),
+            month8=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[7][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[7][0])
+                    )
+                ), 0
+            ),
+            month9=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[8][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[8][0])
+                    )
+                ), 0
+            ),
+            month10=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[9][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[9][0])
+                    )
+                ), 0
+            ),
+            month11=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[10][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[10][0])
+                    )
+                ), 0
+            ),
+            month12=Coalesce(
+                Sum(
+                    'tblmasterpropertyclone__tblproperty__' +
+                    'tblpropertyallocation__tblrentcollection__' +
+                    'rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__month=months[11][1]),
+                        Q(tblmasterpropertyclone__tblproperty__tblpropertyallocation__tblrentcollection__rc_month__year=months[11][0])
+                    )
+                ), 0
+            )
+    )
+
+    # print(masterproperties.values())
+    # for masterproperty in masterproperties.values():
+    #     print(masterproperty)
+
+    Agentvise_rent_data = TblAgent.objects.filter(
+        is_superuser=False,
+        is_active=True,
+        is_staff=True)\
+        .annotate(
+            month1=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[0][1]),
+                        Q(tblrentcollection__rc_month__year=months[0][0])
+                    )
+                    ), 0
+            ),
+            month2=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[1][1]),
+                        Q(tblrentcollection__rc_month__year=months[1][0])
+                    )
+                    ), 0
+            ),
+            month3=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[2][1]),
+                        Q(tblrentcollection__rc_month__year=months[2][0])
+                    )
+                    ), 0
+            ),
+            month4=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[3][1]),
+                        Q(tblrentcollection__rc_month__year=months[3][0])
+                    )
+                    ), 0
+            ),
+            month5=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[4][1]),
+                        Q(tblrentcollection__rc_month__year=months[4][0])
+                    )
+                    ), 0
+            ),
+            month6=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[5][1]),
+                        Q(tblrentcollection__rc_month__year=months[5][0])
+                    )
+                    ), 0
+            ),
+            month7=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[6][1]),
+                        Q(tblrentcollection__rc_month__year=months[6][0])
+                    )
+                    ), 0
+            ),
+            month8=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[7][1]),
+                        Q(tblrentcollection__rc_month__year=months[7][0])
+                    )
+                    ), 0
+            ),
+            month9=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[8][1]),
+                        Q(tblrentcollection__rc_month__year=months[8][0])
+                    )
+                    ), 0
+            ),
+            month10=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[9][1]),
+                        Q(tblrentcollection__rc_month__year=months[9][0])
+                    )
+                    ), 0
+            ),
+            month11=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[10][1]),
+                        Q(tblrentcollection__rc_month__year=months[10][0])
+                    )
+                    ), 0
+            ),
+            month12=Coalesce(
+                Sum('tblrentcollection__rc_allocation__pa_final_rent',
+                    filter=Q(
+                        Q(tblrentcollection__rc_month__month=months[11][1]),
+                        Q(tblrentcollection__rc_month__year=months[11][0])
+                    )
+                    ), 0
+            ),
+    )
+
+    # agentwise_tenant_visit=TblAgent.objects.filter(
+    #     is_superuser=False,is_active=True,
+    #     is_staff=True)\
+    #         .annotate(
+    #             visits=\
+    #                 Count('tbltenant__tblvisit__vs_tenant',
+    #                 filter=Q(tbltenant__tblvisit__vs_date__gte=datetime.now()-timedelta(days=30)) 
+    #             )
+    #         )
+    
+    agentwise_tenant_intrest=TblAgent.objects.filter(
+        is_superuser=False,is_active=True,
+        is_staff=True)\
+            .annotate(
+                allvisits=\
+                    Count('tbltenant__tblvisit__vs_tenant',
+                    filter=Q(tbltenant__tblvisit__vs_date__gte=datetime.now()-timedelta(days=30)) 
+                ),
+                status1=\
+                    Count('tbltenant__tblvisit__vs_tenant',
+                    filter=Q(Q(tbltenant__tblvisit__vs_date__gte=datetime.now()-timedelta(days=30)) &
+                    Q(tbltenant__tblvisit__vs_intrest_status=1))
+                ),
+                status2=\
+                    Count('tbltenant__tblvisit__vs_tenant',
+                    filter=Q(Q(tbltenant__tblvisit__vs_date__gte=datetime.now()-timedelta(days=30)) &
+                    Q(tbltenant__tblvisit__vs_intrest_status=2))
+                ),
+                status3=\
+                    Count('tbltenant__tblvisit__vs_tenant',
+                    filter=Q(Q(tbltenant__tblvisit__vs_date__gte=datetime.now()-timedelta(days=30)) &
+                    Q(tbltenant__tblvisit__vs_intrest_status=3))
+                )
+            )
 
 
-    return render(request, 'admin/index.html', {'msp_list': msp_list,'allinfo': allinfo,'rent':rent})
+    # print(agentwise_tenant_intrest.values('first_name','allvisits','status1','status2','status3'))
+
+    # for masterproperty in masterproperties:
+    #     data = TblRentCollection.objects\
+    #         .filter(rc_pay_off_date__lt=datetime.now()
+    #                 + timedelta(days=365),
+    #                 rc_allocation__pa_property__pr_master__cln_master=masterproperty)\
+    #         .annotate(month=TruncMonth('rc_pay_off_date'))\
+    #         .values('month')\
+    #         .annotate(rent=Sum('rc_allocation__pa_final_rent'))\
+    #         .order_by('month')
+    #         # print
+    #     rent.append(
+    #         {
+    #             'msp':masterproperty.msp_name,
+    #             # 'month':data.month,
+    #             'rent':[data.values('rent')]
+    #         }
+    #     )
+
+    # for r in rent:
+    #     print(r)
+    months_in_str = []
+    for month in months:
+        months_in_str.append(datetime.strptime(
+            str(month[1])+','+str(month[0]), '%m,%Y').strftime('%b,%Y'))
+    # print(months_in_str)
+    return render(request, 'admin/index.html',
+                  {'msp_list': msp_list,
+                   'months': months_in_str,
+                   'rent': masterproperties,
+                   'agent_wise_rent': Agentvise_rent_data,
+                   'agentwise_tenant_intrest':agentwise_tenant_intrest,
+                   'allinfo': allinfo, })
 
 # Page Agent Requests..................................................................................................
 # view all agent requests on admin site
@@ -1161,14 +1475,16 @@ def manage_clones(request):
     msp_list = []
     if request.method == 'POST':
         clone = request.POST['to_clone']
+        # print(clone)
+        objclone = TblMasterPropertyClone.objects.get(pk=clone)
         to_agent = TblAgentAllocation.objects\
             .get(al_master__pk=clone).al_agent
         properties = request.POST.getlist('move_to[]')
         for pr in properties:
             pr = TblProperty.objects.get(id=pr)
-            pr.pr_master = clone
+            pr.pr_master = objclone
             pr.save()
-            if pr.is_allocated:
+            if pr.pr_is_allocated:
                 try:
                     # code for from agent
                         # from_agent = TblAgentAllocation.objects\
@@ -1341,7 +1657,8 @@ def agent_index(request):
 
     monthly_rent_collection = TblRentCollection.objects\
         .filter(rc_pay_off_date__lt=datetime.now()
-                + timedelta(days=365))\
+                + timedelta(days=365),
+                rc_agent=request.user)\
         .annotate(month=TruncMonth('rc_pay_off_date'))\
         .values('month')\
         .annotate(sum=Sum('rc_allocation__pa_final_rent'))\
@@ -1480,6 +1797,7 @@ def addTenant(request):
                 .POST['tn_reference_name']
             tenant.tn_reference_address = request\
                 .POST['tn_reference_address']
+            tenant.tn_status = 0
             if 'tn_profile' in request.FILES.keys():
                 tenant.tn_profile = request.FILES['tn_profile']
                 # print("Data hai:",request.FILES['tn_profile'])
@@ -2168,6 +2486,7 @@ def view_visit(request):
     if status == 'allocated':
         months = TblVisit.objects\
             .filter(vs_date__year=year,
+                    
                     vs_property__pr_is_allocated=True)\
             .dates('vs_date', 'month', order='DESC')\
             .distinct('datefield').order_by('datefield')\
@@ -2177,6 +2496,7 @@ def view_visit(request):
             print(d.get('datefield').strftime('%B, %Y'))
         visits = TblVisit.objects\
             .filter(vs_date__year=year,
+                    vs_tenant__tn_agent=request.user,
                     vs_property__pr_is_allocated=True)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
@@ -2217,6 +2537,7 @@ def view_visit(request):
             print(d.get('datefield').strftime('%B, %Y'))
         visits = TblVisit.objects\
             .filter(vs_date__year=year,
+            vs_tenant__tn_agent=request.user,
                     vs_property__pr_is_allocated=False)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
@@ -2253,7 +2574,8 @@ def view_visit(request):
         print(months)
         for d in months:
             print(d.get('datefield').strftime('%B, %Y'))
-        visits = TblVisit.objects.filter(vs_date__year=year,)\
+        visits = TblVisit.objects.filter(vs_date__year=year,
+        vs_tenant__tn_agent=request.user,)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
             .annotate(
@@ -2290,7 +2612,8 @@ def view_visit(request):
         print(months)
         for d in months:
             print(d.get('datefield').strftime('%B, %Y'))
-        visits = TblVisit.objects.filter(vs_date__year=year)\
+        visits = TblVisit.objects.filter(vs_date__year=year
+        ,vs_tenant__tn_agent=request.user,)\
             .select_related('vs_tenant')\
             .select_related('vs_property')\
             .annotate(

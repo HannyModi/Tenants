@@ -39,12 +39,13 @@ Agent List
                   <label> Property :</label> <input type="text" 
                   value="{{ prp.pa_property.pr_address }}, {{ prp.pa_property.pr_master.cln_master.msp_name }}, {{ prp.pa_property.pr_master.cln_master.msp_address }}" disabled /></br><br />
                 {% elif plist %}
-                  <label> Property:</label><select style="width:75%;" required name="pselect">
+                  <label> Property:</label><select style="width:75%;" required id="pselect_id" name="pselect">
                     <option value="" selected>Select Property</option>
                     {% for p in plist %}
-                    <option value={{p.vs_property.pk}}>{{ p.vs_property.pr_address }} {{ p.vs_property.pr_master.cln_master.msp_name }} {{ p.vs_property.pr_master.cln_master.msp_address }}</option>
+                    <option data-rent={{p.vs_property.pr_rent}} value={{p.vs_property.id}}>{{ p.vs_property.pr_address }} {{ p.vs_property.pr_master.cln_master.msp_name }} {{ p.vs_property.pr_master.cln_master.msp_address }} Rent:{{p.vs_property.pr_rent}}/- </option>
                     {% endfor %}
                   </select><br /><br />
+                  
                 {% else %}
                   <label>
                   You have no unallocated visited proeprty for selected tenant</label>

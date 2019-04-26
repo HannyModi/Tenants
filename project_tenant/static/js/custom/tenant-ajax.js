@@ -1058,3 +1058,8 @@ $('#tenant_submit').click(function () {
         $('#tenant_details').html(data);
     });
 })
+
+// $('#pselect_id').on("change.select2", function(e) { 
+//     alert(this.value,$(this).attr('data-rent'))
+//  });
+            
