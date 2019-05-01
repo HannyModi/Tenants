@@ -1642,8 +1642,8 @@ def agent_index(request):
         .select_related('pa_tenant')\
         .select_related('pa_property__pr_master__cln_master')\
         .filter(pa_is_allocated=True,
-                pa_agreement_end_date__lt=datetime.now()
-                + timedelta(days=1300),
+                pa_agreement_end_date__lte=datetime.now()
+                + timedelta(days=30),
                 pa_tenant__tn_agent=request.user)\
         .order_by('pa_agreement_end_date')
 
@@ -2040,6 +2040,7 @@ def TenantDetails(request, tid):
     for h in history:
         if h.pa_is_allocated == True:
             count = 0
+       
     return render(request, 'agent/view_tenant_detail.html',
                   {'tenant': tenant,
                    'history': history,

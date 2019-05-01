@@ -24,15 +24,16 @@ Agent Home
     <div id="near_to_expire_agreements">
       <h1>Soon to expire Agreement</h1>
       <div class="row clearfix">
+        {% if neartoend_agreement %}
         {% for neartoend in neartoend_agreement %}
          <div class="span4">
-          <span class="card bg-secondary text-white">
+          <a href="{% url 'TenantDetails' neartoend.pa_tenant.pk %}"><span class="card bg-secondary text-white">
             <span class="card-body" style="font-size: 0.4cm">
               Property:{{neartoend.pa_property.pr_address}} {{neartoend.pa_property.pr_master.cln_master.msp_name}}<br />
               Tenant:{{neartoend.pa_tenant.tn_name}} <br />
               Agreement End Date:{{neartoend.pa_agreement_end_date}}
             </span>
-          </span>
+          </span></a>
         </div>
         {% if forloop.counter|divisibleby:"3" %}
       </div>
@@ -41,9 +42,15 @@ Agent Home
         {% endif %}
 
         {% endfor %}
+        {% else %}
+        <h4><center>No Agreement ending in month</center></h4>
+        <br>
+        {% endif %}
       </div>
 
     </div>
+    <hr>
+    <h1><center>Reports</center></h1>
     <div class="row">
       <div class='span6'>
         <div id="rentcollectionchart">

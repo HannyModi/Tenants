@@ -87,11 +87,11 @@ tenant Profile
                                 <tr style="padding:5px;">
                                     <td style="padding:10px;"><b>Image:</b></td>
                                     <td style="padding:10px;"> <img src="{{ MEDIA_URL }}{{ tenant.tn_profile }}"
-                                            alt="no imtne of {{ tenant.tn_name }}"></td>
+                                            alt="no image of {{ tenant.tn_name }}"></td>
                                 </tr>
                                 <tr style="padding:5px;">
                                     <td style="padding:10px;"><b>Name:</b></td>
-                                    <td style="padding:10px;">{{ tenant.tn_name }}</td>
+                                    <td style="padding:10px;">{{tenant.id}} {{ tenant.tn_name }}</td>
                                 </tr>
                                 <tr style="padding:5px;">
                                     <td style="padding:10px;"><b>Contact:</b></td>
@@ -136,27 +136,41 @@ tenant Profile
                 </div>
             </div>
             <div class="span1"></div>            
-            <div class="span6">
+            <div class="span7">
                 {% if history %}
                     <h5>History</h5>
                         <table class="table fixed_header">
                             <thead>
                                 <tr>
                                     <th colspan="2">Property</th>
-                                    <th>Agreement Date</th>
-                                    <th>Agreement End Date</th>
+                                    <th colspan="2">Agreement Date</th>
+                                    <th colspan="2">Agreement End Date</th>
                                     <th>Rent</th>
-                                    <th>Currently Living</th>
+                                    <th colspan="2">Operations</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for h in history %}
                                 <tr>
                                     <td colspan="2">{{ h.pa_property.pr_address}}, {{h.pa_property.pr_master.cln_master.msp_name}},{{h.pa_property.pr_master.cln_master.msp_address}}</td>
-                                    <td>{{h.pa_agreement_date}}</td>
-                                    <td>{{h.pa_agreement_end_date}}</td>
+                                    <td colspan="2">{% if h.pa_agreement_date != None %}{{h.pa_agreement_date}}{% else %}Agreement underprocess{% endif %}</td>
+                                    <td colspan="2">{% if h.pa_agreement_end_date != None %}{{h.pa_agreement_end_date}}{% else %}Agreement underprocess{% endif %}</td>
                                     <td>{{h.pa_final_rent}}</td>
-                                    <td>{% if h.pa_is_allocated == True %}<a data-tid="{{ tenant.id }}" data-toggle="tooltip" title="Deallocate" class="deallocate_tenant">Yes</a>{% else %}No{% endif%} </td>
+                                    <td colspan="2">{% if h.pa_is_allocated == True %}
+                                            <div class="dropdown">
+                                                    <a class="dropdownlink" data-id="{{h.pa_property.pk}}">{% if tenant.tn_status == 2 %}Agreement Underprocess{% else %}Currently Living {% endif %}<i class='icon-angle-down'></i></a>
+                                                    <div class="dropdown-content">
+                                                    <a data-pid='{{h.pa_property.pk}}' data-toggle="tooltip" title="Deallocate Property" class="deallocate_tenant"> Deallocate </a>
+                                                    {% if tenant.tn_status == 3 %}
+                                                    <a class="renew_agreement" data-id='{{ tenant.pk }}' data-toggle="tooltip" title="Register new agreement process for this property ">Renew Agreement</a>
+                                                    {% comment %} <!-- <a data-tid='{{tenant.pk}}'data-toggle="tooltip" title="Renew Agreement" class="renew_agreement"> Renew Agreement </a>                                     --> {% endcomment %}
+                                                    {% endif %}          
+                                        {% comment %} {% elif tenant.tn_status == 2 and h.pa_is_allocated == False %}
+                                            Living here {% endcomment %}
+                                        {% else %}
+                                            Lived here in history
+                                        {% endif%} 
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
